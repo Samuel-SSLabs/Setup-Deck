@@ -1,232 +1,277 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setup Deck</title>
-    <style>
-        /* Variáveis de cores para facilitar a personalização */
-        :root {
-            --bg-left: #1a1a1a;
-            --bg-right: #121212;
-            --text-color: #ffffff;
-            --accent-color: #007bff;
-            --accent-hover: #0056b3;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Download - Setup Deck</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & TOKENS (Importados do seu App) ─────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:        #0d0d0f;  --s1:        #141418;  --s2:        #1c1c22;
+  --s3:        #242430;  --s4:        #2e2e3c;  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.13); --accent:    #e8ff47; --accent2:   rgba(232,255,71,0.14);
+  --accent3:   rgba(232,255,71,0.06);  --text:      #f0f0f4; --muted:     #7a7a90;
+  --muted2:    #4a4a5a;  
+  --r:  12px; --rs: 8px; font-size: 14px;
+}
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: var(--text-color);
-            overflow-x: hidden;
-        }
+body, html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  height: 100vh;
+  overflow-x: hidden;
+  user-select: none;
+}
 
-        /* Container principal dividido em dois */
-        .container {
-            display: flex;
-            width: 100%;
-            height: 100vh; /* Ocupa 100% da altura da tela */
-        }
+/* ─── ESTRUTURA PRINCIPAL ────────────────────────────────────── */
+.layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
 
-        /* METADE ESQUERDA - Botão de Download */
-        .left-panel {
-            flex: 1; /* Ocupa 50% da tela */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: var(--bg-left);
-        }
+/* METADE ESQUERDA (Botão) */
+.left-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  position: relative;
+}
 
-        .download-btn {
-			display: inline-block; /* Adicione esta linha */
-            text-decoration: none; /* Adicione esta linha para tirar o sublinhado */
-            padding: 18px 45px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #fff;
-            background-color: var(--accent-color);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-        }
+/* Estilo do botão puxado do .btn.primary do seu app, mas ampliado */
+.download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px 40px;
+  border-radius: var(--rs);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 20px var(--accent2);
+}
 
-        .download-btn:hover {
-            background-color: var(--accent-hover);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.5);
-        }
+.download-btn:hover {
+  background: #d4eb30;
+  transform: scale(0.98);
+  box-shadow: 0 0 30px rgba(232,255,71,0.25);
+}
 
-        /* METADE DIREITA - Informações e Background */
-        .right-panel {
-            flex: 1; /* Ocupa 50% da tela */
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 0 10%; /* Espaçamento lateral */
-            background-color: var(--bg-right);
-            z-index: 1;
-        }
+.btn-icon {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 400;
+}
 
-        /* Imagem de fundo com 80% de opacidade */
-        .right-panel::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            /* Substitua 'sua-imagem.jpg' pelo caminho da imagem das Decks */
-            background-image: url('sua-imagem.jpg'); 
-            background-size: cover;
-            background-position: center;
-            opacity: 0.8; /* Opacidade de 80% aplicada apenas no fundo */
-            z-index: -1;
-        }
+/* METADE DIREITA (Info e Fundo) */
+.right-panel {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 8%;
+  background: var(--s1);
+  border-left: 1px solid var(--border);
+  z-index: 1;
+}
 
-        /* Gradiente escuro sutil para garantir a leitura do texto por cima da imagem */
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to right, rgba(18,18,18,0.95), rgba(18,18,18,0.5));
-            z-index: -1;
-        }
+/* Imagem de fundo da Deck */
+.right-panel::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  /* COLOQUE O CAMINHO DA SUA IMAGEM AQUI */
+  background-image: url('sua-imagem-deck.jpg'); 
+  background-size: cover;
+  background-position: center;
+  opacity: 0.8;
+  z-index: -2;
+  /* Efeito opcional em preto e branco para combinar mais com o tema dark */
+  filter: grayscale(80%); 
+}
 
-        /* Cabeçalho do lado direito (Logo + Título) */
-        .header-wrapper {
-            display: flex;
-            align-items: center;
-            margin-bottom: 25px;
-        }
+/* Gradiente escuro para mesclar a imagem com o estilo dark do app */
+.right-panel::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(to right, var(--s1) 0%, rgba(20,20,24,0.4) 100%);
+  z-index: -1;
+}
 
-        .logo {
-            width: 70px; /* Ajuste o tamanho da sua logo */
-            height: 70px;
-            background-color: #333; /* Fundo temporário */
-            border-radius: 12px;
-            margin-right: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            color: #aaa;
-            /* Quando tiver a logo, remova o background e use uma tag <img> aqui dentro ou background-image */
-        }
+/* ─── CONTEÚDO (Header, Textos, Lista) ───────────────────────── */
+.header-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
 
-        .title {
-            font-size: 3.5rem;
-            margin: 0;
-            font-weight: 700;
-            letter-spacing: -1px;
-        }
+.logo-box {
+  width: 64px;
+  height: 64px;
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
 
-        /* Descrição */
-        .description {
-            font-size: 1.15rem;
-            line-height: 1.6;
-            margin-bottom: 35px;
-            color: #e0e0e0;
-            max-width: 90%;
-        }
+.title {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
 
-        /* Lista de Dispositivos */
-        .devices-title {
-            font-size: 1.4rem;
-            margin-bottom: 15px;
-            color: #fff;
-        }
+.version-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--accent3);
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--accent2);
+  vertical-align: middle;
+  margin-left: 12px;
+}
 
-        .devices-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+.description {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin-bottom: 40px;
+  max-width: 90%;
+}
 
-        .devices-list li {
-            font-size: 1.15rem;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            color: #ccc;
-        }
+/* Estilo de lista baseado nas tags do seu projeto */
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
 
-        .devices-list li::before {
-            content: "❖"; /* Ícone decorativo para a lista */
-            color: var(--accent-color);
-            margin-right: 12px;
-            font-size: 1.2rem;
-        }
+.devices-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-        /* RODAPÉ - Criadores */
-        .footer {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #777;
-            /* Ajuste para centralizar independentemente do flexbox */
-            left: 0; 
-            z-index: 10;
-        }
+.devices-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--s2);
+  border: 1px solid var(--border2);
+  padding: 12px 20px;
+  border-radius: var(--rs);
+  max-width: fit-content;
+}
 
-        /* Responsividade básica para telas menores */
-        @media (max-width: 900px) {
-            .container {
-                flex-direction: column;
-            }
-            .left-panel, .right-panel {
-                height: 50vh;
-            }
-            .right-panel {
-                padding: 40px;
-            }
-        }
-    </style>
+/* Pontinho de status verde inspirado no app */
+.devices-list li::before {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4dffb4; /* var(--green) */
+  box-shadow: 0 0 8px rgba(77,255,180,0.4);
+}
+
+/* ─── RODAPÉ ─────────────────────────────────────────────────── */
+.footer {
+  position: absolute;
+  bottom: 24px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  z-index: 10;
+}
+
+.footer span {
+  color: var(--muted);
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+  .layout { flex-direction: column; }
+  .left-panel, .right-panel { height: 50vh; }
+  .right-panel { padding: 40px; border-left: none; border-top: 1px solid var(--border); }
+}
+</style>
 </head>
 <body>
 
-    <div class="container">
-        
-        <div class="left-panel">
-            <a href="https://github.com/Samuel-SSLabs/Setup-Deck/raw/refs/heads/main/setup-deck.exe" class="download-btn" download>Download Setup Deck</a>
-        </div>
+<div class="layout">
+  
+  <!-- METADE ESQUERDA -->
+  <div class="left-panel">
+    <a href="https://github.com/Samuel-SSLabs/Setup-Deck/raw/refs/heads/main/setup-deck.exe" class="download-btn" download>
+      <span class="btn-icon">↓</span>
+      Baixar Setup Deck
+    </a>
+  </div>
 
-        <div class="right-panel">
-            <div class="overlay"></div> <div class="header-wrapper">
-                <div class="logo">LOGO</div> 
-                <h1 class="title">Setup Deck</h1>
-            </div>
-
-            <p class="description">
-                O ecossistema definitivo para controle de atalhos e macros do seu setup. 
-                Desenvolvido para oferecer resposta imediata e integração nativa, elevando 
-                sua produtividade e imersão a um novo nível de eficiência.
-            </p>
-
-            <h2 class="devices-title">Dispositivos Compatíveis:</h2>
-            <ul class="devices-list">
-                <li>Core Deck</li>
-                <li>Pulse Deck</li>
-                <li>Pro Deck</li>
-            </ul>
-        </div>
-
+  <!-- METADE DIREITA -->
+  <div class="right-panel">
+    
+    <div class="header-wrapper">
+      <!-- Substitua pela imagem da sua logo -->
+      <div class="logo-box">LOGO</div>
+      <h1 class="title">Setup Deck <span class="version-badge">v1.2</span></h1>
     </div>
 
-    <div class="footer">
-        Desenvolvido por <strong>[Seu Nome]</strong> e <strong>[Nome do seu amigo]</strong>.
-    </div>
+    <p class="description">
+      O ecossistema definitivo para controle de atalhos e macros do seu setup. 
+      Desenvolvido para oferecer resposta imediata e integração nativa, elevando 
+      sua produtividade e imersão a um novo nível de eficiência.
+    </p>
+
+    <div class="section-label">Dispositivos Compatíveis</div>
+    <ul class="devices-list">
+      <li>Core Deck</li>
+      <li>Pulse Deck</li>
+      <li>Pro Deck</li>
+    </ul>
+
+  </div>
+
+</div>
+
+<!-- RODAPÉ -->
+<div class="footer">
+  Powered by <span>SSLabs</span> & <span>Logic S.A.</span>
+</div>
 
 </body>
 </html>
