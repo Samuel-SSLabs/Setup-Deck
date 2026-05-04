@@ -1,472 +1,232 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Setup Deck</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
-<style>
-/* ─── RESET & TOKENS ─────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg:        #0d0d0f;  --s1:        #141418;  --s2:        #1c1c22;
-  --s3:        #242430;  --s4:        #2e2e3c;  --border:    rgba(255,255,255,0.07);
-  --border2:   rgba(255,255,255,0.13); --accent:    #e8ff47; --accent2:   rgba(232,255,71,0.14);
-  --accent3:   rgba(232,255,71,0.06);  --text:      #f0f0f4; --muted:     #7a7a90;
-  --muted2:    #4a4a5a;  --blue:      #4da6ff;  --blue-dim:  rgba(77,166,255,0.12);
-  --green:     #4dffb4;  --green-dim: rgba(77,255,180,0.12); --red:       #ff4d6d;
-  --red-dim:   rgba(255,77,109,0.12);  --orange:    #ffaa4d;
-  --r:  12px; --rs: 8px; --rx: 18px; font-size: 14px;
-}
-body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; user-select: none; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Deck</title>
+    <style>
+        /* Variáveis de cores para facilitar a personalização */
+        :root {
+            --bg-left: #1a1a1a;
+            --bg-right: #121212;
+            --text-color: #ffffff;
+            --accent-color: #007bff;
+            --accent-hover: #0056b3;
+        }
 
-/* ─── TITLEBAR Wails ────────────────────────────────────────── */
-.titlebar { --wails-draggable:drag; display: flex; align-items: center; justify-content: space-between; height: 42px; padding: 0 16px; background: var(--s1); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.titlebar-brand { display: flex; align-items: center; gap: 10px; }
-.titlebar-logo { width: 24px; height: 24px; object-fit: contain; }
-.titlebar-name { font-size: 13px; font-weight: 600; letter-spacing: 0.04em; color: var(--text); }
-.titlebar-version { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-left: 4px; }
-.titlebar-status { display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--green); transition: color 0.3s; }
-.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink 2s ease-in-out infinite; transition: background 0.3s; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
 
-/* Estado Desconectado */
-.titlebar-status.disconnected { color: var(--red); }
-.titlebar-status.disconnected .status-dot { background: var(--red); animation: none; }
+        /* Container principal dividido em dois */
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100vh; /* Ocupa 100% da altura da tela */
+        }
 
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-.titlebar-controls { --wails-draggable:no-drag; display: flex; gap: 6px; }
-.win-btn { width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent; color: var(--muted); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
-.win-btn:hover { background: var(--s3); color: var(--text); }
-.win-btn.close:hover { background: var(--red-dim); color: var(--red); }
+        /* METADE ESQUERDA - Botão de Download */
+        .left-panel {
+            flex: 1; /* Ocupa 50% da tela */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-left);
+        }
 
-/* ─── MAIN LAYOUT ────────────────────────────────────────────── */
-.app-body { display: flex; flex: 1; overflow: hidden; }
-.sidenav { width: 220px; background: var(--s1); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 16px 10px; gap: 2px; flex-shrink: 0; }
-.nav-section-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted2); text-transform: uppercase; letter-spacing: .1em; padding: 10px 10px 6px; }
-.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: var(--rs); cursor: pointer; font-size: 13px; color: var(--muted); transition: all .15s; border: 1px solid transparent; }
-.nav-item:hover:not(.disabled-item) { background: var(--s2); color: var(--text); }
-.nav-item.active { background: var(--accent2); color: var(--accent); border-color: rgba(232,255,71,.18); font-weight: 600; }
-.nav-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
-.nav-badge { margin-left: auto; background: var(--s3); font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); padding: 2px 7px; border-radius: 10px; }
-.nav-item.active .nav-badge { background: rgba(232,255,71,.15); color: var(--accent); }
-.sidenav-footer { margin-top: auto; padding: 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted2); line-height: 1.6; }
+        .download-btn {
+			display: inline-block; /* Adicione esta linha */
+            text-decoration: none; /* Adicione esta linha para tirar o sublinhado */
+            padding: 18px 45px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
 
-/* Classe para bloquear a Core Deck */
-.disabled-item { opacity: 0.3; pointer-events: none; filter: grayscale(100%); transition: all 0.3s; }
+        .download-btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.5);
+        }
 
-/* ─── PAGES ──────────────────────────────────────────────────── */
-.page { display: none; flex: 1; overflow-y: auto; padding: 28px 32px; }
-.page.active { display: block; }
-.page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 16px; }
-.page-title { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
-.page-sub { font-size: 13px; color: var(--muted); margin-top: 3px; font-weight: 400; }
+        /* METADE DIREITA - Informações e Background */
+        .right-panel {
+            flex: 1; /* Ocupa 50% da tela */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 10%; /* Espaçamento lateral */
+            background-color: var(--bg-right);
+            z-index: 1;
+        }
 
-/* ─── BUTTONS & CARDS ────────────────────────────────────────── */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 18px; border-radius: var(--rs); border: 1px solid var(--border2); background: var(--s2); color: var(--text); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; white-space: nowrap; }
-.btn:hover { background: var(--s3); }
-.btn:active { transform: scale(.98); }
-.btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-.btn.primary:hover { background: #d4eb30; }
-.btn.ghost { background: transparent; border-color: var(--border); }
-.btn.ghost:hover { background: var(--s2); }
+        /* Imagem de fundo com 80% de opacidade */
+        .right-panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Substitua 'sua-imagem.jpg' pelo caminho da imagem das Decks */
+            background-image: url('sua-imagem.jpg'); 
+            background-size: cover;
+            background-position: center;
+            opacity: 0.8; /* Opacidade de 80% aplicada apenas no fundo */
+            z-index: -1;
+        }
 
-.card { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; }
-.card-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 16px; }
-.buttons-layout { display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start; }
+        /* Gradiente escuro sutil para garantir a leitura do texto por cima da imagem */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(18,18,18,0.95), rgba(18,18,18,0.5));
+            z-index: -1;
+        }
 
-/* ─── DEVICE GRID ────────────────────────────────────────────── */
-.device-card { background: var(--s1); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
-.device-frame { background: var(--s2); border: 1px solid var(--border2); border-radius: 16px; padding: 22px; }
-.device-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.device-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: .08em; }
-.usb-badge { display: flex; align-items: center; gap: 5px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--green); background: var(--green-dim); border: 1px solid rgba(77,255,180,.2); padding: 3px 8px; border-radius: 20px; transition: all 0.3s;}
-.usb-badge.disconnected { color: var(--red); background: var(--red-dim); border-color: rgba(255,77,109,.2); }
-.usb-badge.disconnected .status-dot { background: var(--red); animation: none;}
+        /* Cabeçalho do lado direito (Logo + Título) */
+        .header-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
 
-.btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.btn-tile { aspect-ratio: 1; background: var(--s3); border: 1.5px solid var(--border2); border-radius: var(--r); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; position: relative; overflow: hidden; padding: 8px; transition: all .18s; z-index: 1; }
-.btn-tile::after { content: ''; position: absolute; inset: 0; background: var(--accent3); opacity: 0; transition: opacity .18s; z-index: -2; }
-.btn-tile:hover::after { opacity: 1; }
-.btn-tile.selected { border-color: var(--accent); background: var(--accent2); }
-.btn-tile.selected::after { opacity: 1; }
-.btn-tile.configured { border-color: rgba(77,166,255,.35); }
+        .logo {
+            width: 70px; /* Ajuste o tamanho da sua logo */
+            height: 70px;
+            background-color: #333; /* Fundo temporário */
+            border-radius: 12px;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: #aaa;
+            /* Quando tiver a logo, remova o background e use uma tag <img> aqui dentro ou background-image */
+        }
 
-/* Ícone/Imagem de fundo atualizada */
-.bg-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50%; height: 50%; object-fit: contain; opacity: 0.08; z-index: -1; pointer-events: none; transition: all 0.2s; filter: grayscale(100%); }
-.btn-tile.selected .bg-icon { opacity: 0.2; width: 60%; height: 60%; filter: none;}
+        .title {
+            font-size: 3.5rem;
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
 
-.btn-tile > *:not(.bg-icon):not(::after) { position: relative; z-index: 2; }
-.btn-tile-num { position: absolute; top: 6px; left: 8px; font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted2); }
-.btn-tile-icon { font-size: 18px; line-height: 1; }
-.btn-tile-label { font-size: 9px; color: var(--muted); text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 4px; }
+        /* Descrição */
+        .description {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            margin-bottom: 35px;
+            color: #e0e0e0;
+            max-width: 90%;
+        }
 
-.btn-tile-pips { position: absolute; bottom: 6px; right: 6px; display: flex; gap: 3px; }
-.pip { width: 4px; height: 4px; border-radius: 50%; background: var(--muted2); }
-.pip.on { background: var(--blue); }
+        /* Lista de Dispositivos */
+        .devices-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #fff;
+        }
 
-/* ─── CONFIG PANEL ───────────────────────────────────────────── */
-.cfg-panel { display: flex; flex-direction: column; gap: 16px; }
-.press-tabs { display: flex; background: var(--s2); border-radius: var(--rs); padding: 3px; gap: 2px; }
-.press-tab { flex: 1; padding: 7px 6px; border-radius: 6px; border: none; background: transparent; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 10px; cursor: pointer; transition: all .15s; text-align: center; line-height: 1.3; }
-.press-tab:hover:not(.active) { color: var(--text); }
-.press-tab.active { background: var(--s3); color: var(--text); }
-.field { margin-bottom: 13px; }
-.field:last-child { margin-bottom: 0; }
-.field-label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .07em; }
-.select-wrap { position: relative; }
-.select-wrap::after { content: '▾'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 11px; pointer-events: none; }
-select, input[type="text"] { width: 100%; padding: 9px 12px; background: var(--s2); border: 1px solid var(--border2); border-radius: var(--rs); color: var(--text); font-size: 13px; font-family: 'Syne', sans-serif; appearance: none; transition: border-color .15s; }
-select:focus, input[type="text"]:focus { outline: none; border-color: rgba(232,255,71,.4); }
-select option { background: #1c1c22; }
+        .devices-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
-/* ─── CAPTURE ZONE ───────────────────────────────────────────── */
-.capture-zone { border: 1.5px dashed var(--border2); border-radius: var(--r); padding: 20px 16px; text-align: center; cursor: pointer; transition: all .2s; position: relative; overflow: hidden; }
-.capture-zone.listening { border-color: var(--accent); background: var(--accent3); animation: capture-pulse 1.2s ease-in-out infinite; }
-@keyframes capture-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(232,255,71,.25); } 50% { box-shadow: 0 0 0 8px rgba(232,255,71,0); } }
-.capture-hint { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-.capture-keys { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; min-height: 32px; align-items: center; margin-top: 10px; }
-.key-chip { background: var(--s3); border: 1px solid var(--border2); border-radius: 6px; padding: 4px 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); }
-.capture-zone.listening .key-chip { background: rgba(232,255,71,.15); border-color: rgba(232,255,71,.35); color: var(--accent); }
-.capture-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .devices-list li {
+            font-size: 1.15rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            color: #ccc;
+        }
 
-/* ─── HAPTIC & SLIDERS ───────────────────────────────────────── */
-.haptic-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
-.haptic-row:last-child { border-bottom: none; }
-.haptic-label { font-size: 13px; }
-.haptic-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle-track { position: absolute; inset: 0; background: var(--s3); border: 1px solid var(--border2); border-radius: 11px; cursor: pointer; transition: all .2s; }
-.toggle input:checked + .toggle-track { background: var(--accent); border-color: var(--accent); }
-.toggle-thumb { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: var(--muted); border-radius: 50%; transition: all .2s; }
-.toggle input:checked ~ .toggle-thumb { left: 21px; background: var(--bg); }
-.slider-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-input[type="range"] { -webkit-appearance: none; flex: 1; height: 4px; background: var(--s3); border-radius: 2px; outline: none; border: none; padding: 0; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; }
-.slider-val { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); min-width: 32px; text-align: right; }
-.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .devices-list li::before {
+            content: "❖"; /* Ícone decorativo para a lista */
+            color: var(--accent-color);
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
 
-/* ─── TOAST & JSON ───────────────────────────────────────────── */
-.toast { position: fixed; bottom: 24px; right: 24px; background: var(--s2); border: 1px solid var(--border2); border-radius: var(--r); padding: 12px 18px; font-size: 13px; display: flex; align-items: center; gap: 10px; z-index: 999; opacity: 0; transform: translateY(10px); transition: all .25s; pointer-events: none; }
-.toast.show { opacity: 1; transform: translateY(0); }
-.toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-.toast.success .toast-dot { background: var(--green); }
-.toast.error .toast-dot { background: var(--red); }
-pre.json-box { background: var(--s2); border: 1px solid var(--border2); border-radius: var(--rs); padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); overflow: auto; max-height: 480px; white-space: pre-wrap; line-height: 1.6; margin-top: 10px;}
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--s4); border-radius: 3px; }
-.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-.flex { display: flex; } .flex-col { display: flex; flex-direction: column; }
-.gap-8 { gap: 8px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; }
-</style>
+        /* RODAPÉ - Criadores */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #777;
+            /* Ajuste para centralizar independentemente do flexbox */
+            left: 0; 
+            z-index: 10;
+        }
+
+        /* Responsividade básica para telas menores */
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            .left-panel, .right-panel {
+                height: 50vh;
+            }
+            .right-panel {
+                padding: 40px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<!-- TITLEBAR -->
-<div class="titlebar">
-  <div class="titlebar-brand">
-    <img src="./assets/icon.ico" class="titlebar-logo" alt="Ícone">
-    <span class="titlebar-name">Setup Deck</span>
-    <span class="titlebar-version">v1.2</span>
-  </div>
-  
-  <!-- STATUS DINÂMICO AQUI -->
-  <div class="titlebar-status disconnected" id="connectionStatus">
-    <span class="status-dot"></span> 
-    <span id="statusText">Desconectado</span>
-  </div>
-  
-  <div class="titlebar-controls">
-    <button class="win-btn" onclick="api.minimize()" title="Esconder na Bandeja">─</button>
-    <button class="win-btn" onclick="api.maximize()" title="Maximizar">▭</button>
-    <button class="win-btn close" onclick="api.close()" title="Esconder na Bandeja">✕</button>
-  </div>
-</div>
-
-<!-- APP BODY -->
-<div class="app-body">
-
-<!-- SIDEBAR NAV -->
-  <nav class="sidenav">
-    <span class="nav-section-label">Menu</span>
-    <div class="nav-item active" data-page="buttons">
-      <span class="nav-icon">⌨</span> Botões
-      <span class="nav-badge">6</span>
-    </div>
-    
-    <div class="nav-item" data-page="haptic" id="hapticNav">
-      <span class="nav-icon">📳</span> FB Háptico
-    </div>
-    
-    <div class="nav-item" data-page="firmware">
-      <span class="nav-icon">⚙</span> Firmware
-    </div>
-
-    <!-- CAIXA INFERIOR (Empurra o Sobre e o Rodapé pro fundo juntos) -->
-    <div style="margin-top: auto; display: flex; flex-direction: column;">
-      <div class="nav-item" data-page="sobre">
-        <span class="nav-icon">ℹ️</span> Sobre
-      </div>
-
-      <div class="sidenav-footer" style="margin-top: 10px; padding-top: 16px; border-top: 1px solid var(--border);">
-        Setup Deck Companion<br>
-        Pulse / Core Deck<br>
-        Powered by SSLabs & Logic S.A.
-      </div>
-    </div>
-  </nav>
-
-  <!-- PAGE: BUTTONS -->
-  <div class="page active" id="page-buttons">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Configurar Botões</div>
-        <div class="page-sub">Selecione um botão na Deck para editar suas ações</div>
-      </div>
-      <div class="flex gap-8">
-        <button class="btn ghost" onclick="resetAll()">Limpar tudo</button>
-      </div>
-    </div>
-
-    <div class="buttons-layout">
-      <!-- LEFT: DEVICE GRID -->
-      <div class="flex-col gap-16">
-        <div class="device-card">
-          <div class="device-frame">
-            <div class="device-topbar">
-              <span class="device-label" id="lblDeckName">DECK DETECTADA</span>
-              <span class="usb-badge disconnected" id="lblUsbBadge"><span class="status-dot"></span>USB SERIAL</span>
-            </div>
-            <div class="btn-grid" id="btnGrid"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT: CONFIG PANEL -->
-      <div class="cfg-panel">
-        <div class="card">
-          <div class="flex" style="align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <div>
-              <div style="font-size:15px;font-weight:600;" id="cfgTitle">Botão 1</div>
-              <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;" id="cfgPin">GP28</div>
-            </div>
-            <span style="background:var(--accent2);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 9px;border-radius:6px;border:1px solid rgba(232,255,71,.2);" id="cfgPressLabel">Clique curto</span>
-          </div>
-
-          <div class="press-tabs">
-            <button class="press-tab active" id="tab-curto" onclick="setPress('curto')">⚡<br>Curto</button>
-            <button class="press-tab" id="tab-longo" onclick="setPress('longo')">⏳<br>Longo</button>
-          </div>
-
-          <hr class="divider">
-
-          <div class="field">
-            <label class="field-label">Tipo de ação</label>
-            <div class="select-wrap">
-              <select id="catSelect" onchange="onCategoryChange()">
-                <option value="none">— Desativado —</option>
-                <option value="keyboard">Atalho de teclado</option>
-                <option value="capture">Capturar atalho</option>
-                <option value="media">Multimídia</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="field" id="field-keyboard" style="display:none;">
-            <label class="field-label">Categoria</label>
-            <div class="select-wrap"><select id="kbCategory" onchange="onCategoryKbChange()"></select></div>
-			<label class="field-label" style="margin-top:10px;">Atalho</label>
-			<div class="select-wrap"><select id="kbSelect"></select></div>
-          </div>
-
-          <div class="field" id="field-capture" style="display:none;">
-            <label class="field-label">Capturar combinação de teclas</label>
-            <div class="capture-zone" id="captureZone" onclick="toggleCapture()">
-              <div class="capture-hint" id="captureHint">Clique aqui e pressione a combinação</div>
-              <div class="capture-keys" id="captureKeys">
-                <span style="font-size:12px;color:var(--muted2);">Nenhuma tecla</span>
-              </div>
-            </div>
-            <div class="capture-actions">
-              <button class="btn ghost" style="flex:1;" onclick="clearCapture()">✕ Limpar</button>
-              <button class="btn" style="flex:1;" onclick="confirmCapture()" id="btnConfirmCapture" disabled>✓ Usar</button>
-            </div>
-          </div>
-
-          <div class="field" id="field-media" style="display:none;">
-            <label class="field-label">Comando multimídia</label>
-            <div class="select-wrap"><select id="mediaSelect"></select></div>
-          </div>
-
-          <button class="btn primary" style="width:100%;margin-top:4px;" onclick="saveAction()">Salvar ação</button>
-
-          <hr class="divider">
-          
-          <button class="btn ghost" style="width:100%; border-color: var(--accent); color: var(--accent);" onclick="syncToDevice()">
-            ⚡ Sincronizar com a Deck
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAGE: FB HÁPTICO -->
-  <div class="page" id="page-haptic">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Feedback Háptico</div>
-        <div class="page-sub">Tempos de resposta e vibração (Pulse Deck)</div>
-      </div>
-      <div class="flex gap-8">
-        <button class="btn ghost" style="border-color: var(--accent); color: var(--accent);" onclick="syncToDevice()">
-          ⚡ Sincronizar
-        </button>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;">
-      
-      <div class="card">
-        <div class="card-title">Temporização dos Cliques</div>
-        <div class="field">
-          <label class="field-label">Tempo clique longo (s)</label>
-          <div class="slider-row">
-            <!-- NOVO MAX E MIN: 1.0 a 5.0 -->
-            <input type="range" min="1.0" max="5.0" step="0.1" value="1.5" id="longPressTime" oninput="document.getElementById('longPressVal').textContent=parseFloat(this.value).toFixed(1)+'s'">
-            <span class="slider-val" id="longPressVal">1.5s</span>
-          </div>
-        </div>
-        <div class="field">
-          <label class="field-label">Debounce Touch (ms)</label>
-          <div class="slider-row">
-            <input type="range" min="5" max="80" step="5" value="50" id="debounceTime" oninput="document.getElementById('debounceVal').textContent=this.value+'ms'">
-            <span class="slider-val" id="debounceVal">50ms</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card" id="motorBehaviorCard">
-        <div class="card-title">Comportamento do Motor</div>
-        <div class="haptic-row">
-          <div><div class="haptic-label">Háptico ativado</div></div>
-          <label class="toggle"><input type="checkbox" id="hapticEnabled" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
-        <div class="haptic-row">
-          <div><div class="haptic-label">Vibrar no clique curto</div></div>
-          <label class="toggle"><input type="checkbox" id="hapticShort" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
-        <div class="haptic-row">
-          <div><div class="haptic-label">Vibrar no clique longo</div></div>
-          <label class="toggle"><input type="checkbox" id="hapticLong" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
-        </div>
+    <div class="container">
         
-        <div class="field" style="margin-top: 16px;">
-          <label class="field-label">Intensidade do Pulso (%)</label>
-          <div class="slider-row">
-            <!-- VIBRAÇÃO EM PORCENTAGEM -->
-            <input type="range" min="1" max="100" step="1" value="50" id="hapticIntensityPct" oninput="document.getElementById('hapticIntVal').textContent=this.value+'%'">
-            <span class="slider-val" id="hapticIntVal">50%</span>
-          </div>
+        <div class="left-panel">
+            <a href="https://github.com/Samuel-SSLabs/Setup-Deck/raw/refs/heads/main/setup-deck.exe" class="download-btn" download>Download Setup Deck</a>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- PAGE: FIRMWARE -->
-  <div class="page" id="page-firmware">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Firmware & Sistema</div>
-        <div class="page-sub">Ajustes da ponte com o Sistema Operacional</div>
-      </div>
-    </div>
-<div class="settings-grid" style="align-items: start;">
-      
-      <div class="card">
-        <div class="card-title">Configurações do SO</div>
-        <div class="haptic-row">
-          <div>
-            <div class="haptic-label">Iniciar com o Sistema</div>
-            <div class="haptic-sub">Abre escondido na bandeja do relógio</div>
-          </div>
-          <label class="toggle">
-            <input type="checkbox" id="autoStartOS" onchange="toggleAutoStart(this.checked)">
-            <div class="toggle-track"></div><div class="toggle-thumb"></div>
-          </label>
+        <div class="right-panel">
+            <div class="overlay"></div> <div class="header-wrapper">
+                <div class="logo">LOGO</div> 
+                <h1 class="title">Setup Deck</h1>
+            </div>
+
+            <p class="description">
+                O ecossistema definitivo para controle de atalhos e macros do seu setup. 
+                Desenvolvido para oferecer resposta imediata e integração nativa, elevando 
+                sua produtividade e imersão a um novo nível de eficiência.
+            </p>
+
+            <h2 class="devices-title">Dispositivos Compatíveis:</h2>
+            <ul class="devices-list">
+                <li>Core Deck</li>
+                <li>Pulse Deck</li>
+                <li>Pro Deck</li>
+            </ul>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Carga Útil Gerada (Payload Serial)</div>
-        <div style="font-size:12px;color:var(--muted); margin-bottom: 8px;">Este é o dado exato enviado para a RP2040 ao sincronizar.</div>
-        <button class="btn ghost" style="width: 100%; justify-content:center;" onclick="refreshPreview()">↻ Atualizar visualização do JSON</button>
-        <pre class="json-box" id="jsonBox">Clique em "Atualizar" para ver o payload.</pre>
-      </div>
 
     </div>
-  </div>
 
-<!-- PAGE: SOBRE -->
-  <div class="page" id="page-sobre">
-    <div class="page-header">
-      <div>
-        <div class="page-title">Sobre o Setup Deck</div>
-        <div class="page-sub">Informações do sistema e créditos de desenvolvimento</div>
-      </div>
+    <div class="footer">
+        Desenvolvido por <strong>[Seu Nome]</strong> e <strong>[Nome do seu amigo]</strong>.
     </div>
-
-    <div class="settings-grid">
-      
-      <!-- DESCRIÇÃO DO PROJETO -->
-      <div class="card" style="grid-column: 1 / -1;">
-        <div class="card-title">O Projeto</div>
-        <div style="color: var(--muted); line-height: 1.6; font-size: 13px;">
-          O <span style="color: var(--text); font-weight: 600;">Setup Deck Companion</span> é o centro de controle definitivo para suas controladoras <span style="color: var(--text); font-weight: 600;">Pulse</span> e <span style="color: var(--text); font-weight: 600;">Core Deck</span>. 
-          Projetado desde o hardware até o código para oferecer máxima performance, baixa latência e uma interface totalmente intuitiva. 
-          Altere atalhos, configure macros complexas e gerencie o feedback háptico do motor em tempo real.
-          <br><br>
-          <em>Versão atual: v1.2 (Beta)</em>
-        </div>
-      </div>
-
-      <!-- SSLABS (Você) -->
-      <div class="card">
-        <div class="card-title">Hardware & Firmware</div>
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <div style="width: 64px; height: 64px; background: var(--s2); border: 1px solid var(--border2); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
-            <span style="font-size: 24px; color: var(--muted2);">🛠️</span>
-            <img src="./assets/logo-sslabs.png" style="position: absolute; width: 100%; height: 100%; object-fit: cover;" onerror="this.style.opacity=0">
-          </div>
-          <div>
-            <div style="font-weight: 600; font-size: 16px; color: var(--text); letter-spacing: 0.02em;">SSLabs</div>
-            <div style="font-size: 11px; color: var(--muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace;">Engenharia e Eletrônica</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- LOGIC S.A. (Seu Amigo) -->
-      <div class="card">
-        <div class="card-title">Software & Interface</div>
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <div style="width: 64px; height: 64px; background: var(--s2); border: 1px solid var(--border2); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;">
-            <span style="font-size: 24px; color: var(--muted2);">💻</span>
-            <img src="./assets/logo-logicsa.png" style="position: absolute; width: 100%; height: 100%; object-fit: cover;" onerror="this.style.opacity=0">
-          </div>
-          <div>
-            <div style="font-weight: 600; font-size: 16px; color: var(--text); letter-spacing: 0.02em;">Logic S.A.</div>
-            <div style="font-size: 11px; color: var(--muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace;">UX/UI & Desenvolvimento</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-</div><!-- app-body -->
-
-<div class="toast" id="toast"><span class="toast-dot"></span><span id="toastMsg"></span></div>
-
-<script src="renderer.js"></script>
 
 </body>
 </html>
