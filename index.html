@@ -62,46 +62,56 @@ body, html {
   100% { transform: scale(1.1) translate(5%, 5%); opacity: 1; }
 }
 
-/* Container de conteúdo da esquerda (para ficar acima da animação) */
+/* Container de conteúdo da esquerda */
 .left-content {
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center; /* Mudado para centralizar tudo */
+  text-align: center;  /* Garante que os textos fiquem centralizados */
   max-width: 400px;
 }
 
 /* HEADER (Logo + Título) */
 .header-wrapper {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  flex-direction: column; /* Coloca a logo em cima e o título embaixo */
+  align-items: center;    /* Centraliza a logo com o título */
+  gap: 24px;              /* Espaço entre a logo e o título */
   margin-bottom: 40px;
 }
 
 .logo-box {
-  width: 64px;
-  height: 64px;
-  background: var(--s2);
-  border: 1px solid var(--border2);
-  border-radius: var(--r);
+  width: 200px;  /* Espaço mais amplo para o degradê se espalhar suavemente */
+  height: 200px;
+  /* Degradê radial: branco/cinza claro no centro, sumindo nas bordas */
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.05) 50%, transparent 75%);
+  border: none; /* Tiramos a borda quadrada */
+  border-radius: 50%; /* Garante que o esfumaçado seja perfeitamente circular */
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
+  /* Retiramos o background sólido, box-shadow e overflow: hidden */
+}
+
+/* Criamos essa regra para garantir que a imagem fique do tamanho ideal dentro do degradê */
+.logo-box img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  /* Um leve sombreamento direto na silhueta da logo para ela não parecer "chapada" na luz */
+  filter: drop-shadow(0px 6px 12px rgba(0, 0, 0, 0.6)); 
 }
 
 .title-group {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center; /* Centraliza a badge de versão embaixo do nome */
 }
 
 .title {
-  font-family: 'Squada One', sans-serif; /* Fonte Letra Caixa sugerida */
+  font-family: 'Squada One', sans-serif; 
   font-size: 64px;
   line-height: 0.9;
   font-weight: 400;
@@ -118,7 +128,7 @@ body, html {
   padding: 4px 10px;
   border-radius: 20px;
   border: 1px solid var(--accent2);
-  margin-top: 8px;
+  margin-top: 12px; /* Espaço um pouco maior entre o título e a badge */
 }
 
 /* BOTÕES DE DOWNLOAD */
@@ -295,7 +305,7 @@ body, html {
       <!-- Cabeçalho agora na esquerda -->
       <div class="header-wrapper">
         <div class="logo-box">
-          <img src="./assets/logo.png" alt="Logo Setup Deck" style="width: 80%; height: 80%; object-fit: contain;">
+          <img src="./assets/logo.png" alt="Logo Setup Deck">
         </div>
         <div class="title-group">
           <!-- O título usa a Squada One para dar o efeito "Letra Caixa" -->
