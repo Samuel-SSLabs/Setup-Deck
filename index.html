@@ -3,18 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Setup Deck Home</title>
+<title>Download - Setup Deck</title>
 <!-- Importação das fontes -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Squada+One&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 /* ─── RESET & TOKENS ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg:        #0d0d0f;  --s1:        #141418;  --s2:        #1c1c22;
-  --s3:        #242430;  --border:    rgba(255,255,255,0.07);
-  --border2:   rgba(255,255,255,0.13); --accent:    #e8ff47; 
-  --accent2:   rgba(232,255,71,0.14);  --accent3:   rgba(232,255,71,0.06);  
-  --text:      #f0f0f4; --muted:     #7a7a90;  --muted2:    #4a4a5a;  
+  /* PALETA DE CORES MAIS CLARA (Grafite/Slate em vez de Preto Puro) */
+  --bg:        #18181f;  --s1:        #202028;  --s2:        #2a2a35;
+  --s3:        #343442;  --border:    rgba(255,255,255,0.09);
+  --border2:   rgba(255,255,255,0.15); --accent:    #e8ff47; 
+  --accent2:   rgba(232,255,71,0.18);  --accent3:   rgba(232,255,71,0.08);  
+  --text:      #f4f4f8; --muted:     #8a8a9f;  --muted2:    #5a5a6a;  
   --r:  12px; --rs: 8px; font-size: 14px;
 }
 
@@ -45,13 +46,29 @@ body, html {
   overflow: hidden;
 }
 
+/* 1. Efeito de cor dinâmico (Glow Animado) */
 .left-panel::before {
   content: "";
   position: absolute;
   top: -20%; left: -20%;
   width: 140%; height: 140%;
-  background: radial-gradient(circle at center, rgba(232,255,71,0.08) 0%, transparent 60%);
+  background: radial-gradient(circle at center, rgba(232,255,71,0.06) 0%, transparent 60%);
   animation: ambientGlow 8s infinite alternate ease-in-out;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 2. NOVO: Malha gráfica (Linhas e Pontos) usando CSS */
+.left-panel::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  /* Desenhando o grid: pontos nos cruzamentos, e linhas verticais/horizontais */
+  background-image: 
+    radial-gradient(circle at 40px 40px, rgba(255,255,255,0.15) 1.5px, transparent 1.5px),
+    linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px; /* Tamanho dos "quadrados" do grid */
   z-index: 0;
   pointer-events: none;
 }
@@ -63,7 +80,7 @@ body, html {
 
 .left-content {
   position: relative;
-  z-index: 1;
+  z-index: 1; /* Garante que fique acima da malha e do glow */
   display: flex;
   flex-direction: column;
   align-items: center; 
@@ -112,6 +129,7 @@ body, html {
   letter-spacing: 1px;
   color: var(--text);
   text-transform: uppercase;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.3); /* Sombra para destacar contra a malha */
 }
 
 .version-badge {
@@ -136,7 +154,7 @@ body, html {
   border-radius: var(--rs);
   border: 1px solid var(--accent);
   background: var(--accent);
-  color: var(--bg);
+  color: #121214; /* Texto escuro puro no botão para super contraste */
   font-family: 'Squada One', sans-serif; 
   font-size: 26px; 
   font-weight: 400; 
@@ -193,10 +211,10 @@ body, html {
   content: "";
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background-image: url('./assets/bg-deck.jpg'); 
+  background-image: url('./assets/bg-deck.gif'); 
   background-size: cover;
   background-position: center;
-  opacity: 0.8;
+  opacity: 0.6; /* Deixei a imagem um pouquinho mais transparente para clarear o lado direito */
   z-index: -2;
   filter: grayscale(80%); 
 }
@@ -205,7 +223,8 @@ body, html {
   content: "";
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(to right, var(--s1) 0%, rgba(20,20,24,0.4) 100%);
+  /* Gradiente atualizado para mesclar com as novas cores mais claras */
+  background: linear-gradient(to right, var(--s1) 0%, rgba(32,32,40,0.6) 100%);
   z-index: -1;
 }
 
@@ -261,7 +280,7 @@ body, html {
   box-shadow: 0 0 8px rgba(77,255,180,0.4);
 }
 
-/* RODAPÉ COM AS LOGOS (Agora posicionado dentro do lado direito) */
+/* RODAPÉ COM AS LOGOS */
 .footer {
   position: absolute;
   bottom: 24px;
@@ -357,7 +376,7 @@ body, html {
 
       <!-- Download Alternativo -->
       <a href="COLOQUE-O-LINK-ALTERNATIVO-AQUI" class="alt-download" download>
-        Download alternativo
+        Download alternativo (Espelho)
       </a>
 
     </div>
@@ -379,7 +398,7 @@ body, html {
       <li>Wave Deck</li>
     </ul>
 
-    <!-- RODAPÉ COM LOGOS (Movido para cá) -->
+    <!-- RODAPÉ COM LOGOS -->
     <div class="footer">
       <div class="footer-label">Powered By</div>
       <div class="creators-box">
