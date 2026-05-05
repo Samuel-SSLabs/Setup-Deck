@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Download - Setup Deck</title>
-<!-- Importação das fontes: Syne, JetBrains Mono e Squada One (para o título estilo letreiro grosso) -->
+<title>Setup Deck Home</title>
+<!-- Importação das fontes -->
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Squada+One&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 /* ─── RESET & TOKENS ─────────────────────────────────────────── */
@@ -34,7 +34,7 @@ body, html {
   height: 100%;
 }
 
-/* METADE ESQUERDA (Título + Botões + Efeito Dinâmico) */
+/* METADE ESQUERDA */
 .left-panel {
   flex: 1;
   position: relative;
@@ -42,10 +42,9 @@ body, html {
   align-items: center;
   justify-content: center;
   background: var(--bg);
-  overflow: hidden; /* Mantém a animação contida aqui dentro */
+  overflow: hidden;
 }
 
-/* Efeito de cor dinâmico (Glow Animado) no fundo esquerdo */
 .left-panel::before {
   content: "";
   position: absolute;
@@ -62,52 +61,47 @@ body, html {
   100% { transform: scale(1.1) translate(5%, 5%); opacity: 1; }
 }
 
-/* Container de conteúdo da esquerda */
 .left-content {
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Mudado para centralizar tudo */
-  text-align: center;  /* Garante que os textos fiquem centralizados */
-  max-width: 400px;
+  align-items: center; 
+  text-align: center;  
+  max-width: 440px; 
 }
 
 /* HEADER (Logo + Título) */
 .header-wrapper {
   display: flex;
-  flex-direction: column; /* Coloca a logo em cima e o título embaixo */
-  align-items: center;    /* Centraliza a logo com o título */
-  gap: 24px;              /* Espaço entre a logo e o título */
+  flex-direction: column; 
+  align-items: center;    
+  gap: 16px;              
   margin-bottom: 40px;
 }
 
 .logo-box {
-  width: 200px;  /* Espaço mais amplo para o degradê se espalhar suavemente */
+  width: 200px;  
   height: 200px;
-  /* Degradê radial: branco/cinza claro no centro, sumindo nas bordas */
   background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.05) 50%, transparent 75%);
-  border: none; /* Tiramos a borda quadrada */
-  border-radius: 50%; /* Garante que o esfumaçado seja perfeitamente circular */
+  border-radius: 50%; 
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Retiramos o background sólido, box-shadow e overflow: hidden */
 }
 
-/* Criamos essa regra para garantir que a imagem fique do tamanho ideal dentro do degradê */
 .logo-box img {
   width: 120px;
   height: 120px;
   object-fit: contain;
-  /* Um leve sombreamento direto na silhueta da logo para ela não parecer "chapada" na luz */
   filter: drop-shadow(0px 6px 12px rgba(0, 0, 0, 0.6)); 
 }
 
 .title-group {
   display: flex;
-  flex-direction: column;
-  align-items: center; /* Centraliza a badge de versão embaixo do nome */
+  flex-direction: row; 
+  align-items: baseline; 
+  gap: 12px;
 }
 
 .title {
@@ -122,13 +116,13 @@ body, html {
 
 .version-badge {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
+  font-size: 13px; 
   color: var(--accent);
   background: var(--accent3);
   padding: 4px 10px;
   border-radius: 20px;
   border: 1px solid var(--accent2);
-  margin-top: 12px; /* Espaço um pouco maior entre o título e a badge */
+  transform: translateY(-8px); 
 }
 
 /* BOTÕES DE DOWNLOAD */
@@ -143,12 +137,12 @@ body, html {
   border: 1px solid var(--accent);
   background: var(--accent);
   color: var(--bg);
-  font-family: 'Syne', sans-serif;
-  font-size: 16px;
-  font-weight: 800;
+  font-family: 'Squada One', sans-serif; 
+  font-size: 26px; 
+  font-weight: 400; 
   text-decoration: none;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 1.5px;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 0 20px var(--accent2);
@@ -162,8 +156,8 @@ body, html {
 
 .btn-icon {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 18px;
-  font-weight: 400;
+  font-size: 20px;
+  transform: translateY(-2px); 
 }
 
 .alt-download {
@@ -199,8 +193,7 @@ body, html {
   content: "";
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
-  /* Caminho atualizado apontando para a pasta assets */
-  background-image: url('./assets/bg-deck.gif'); 
+  background-image: url('./assets/bg-deck.jpg'); 
   background-size: cover;
   background-position: center;
   opacity: 0.8;
@@ -245,42 +238,85 @@ body, html {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  font-size: 15px;
-  font-weight: 600;
+  font-family: 'Squada One', sans-serif; 
+  font-size: 22px; 
+  font-weight: 400;
+  letter-spacing: 1px;
   color: var(--text);
   background: var(--s2);
   border: 1px solid var(--border2);
-  padding: 12px 20px;
+  padding: 10px 20px;
   border-radius: var(--rs);
   max-width: fit-content;
+  text-transform: uppercase; 
 }
 
 .devices-list li::before {
   content: "";
   display: block;
-  width: 8px;
-  height: 8px;
+  width: 10px; 
+  height: 10px;
   border-radius: 50%;
   background: #4dffb4;
   box-shadow: 0 0 8px rgba(77,255,180,0.4);
 }
 
-/* RODAPÉ */
+/* RODAPÉ COM AS LOGOS (Agora posicionado dentro do lado direito) */
 .footer {
   position: absolute;
   bottom: 24px;
   left: 0;
   width: 100%;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--muted2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   z-index: 10;
-  pointer-events: none;
 }
 
-.footer span {
+.footer-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.creators-box {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.creator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--muted);
+  transition: color 0.2s;
+  cursor: default;
+}
+
+.creator:hover {
+  color: var(--text);
+}
+
+.creator img {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--s2);
+  object-fit: cover;
+}
+
+.creators-divider {
+  color: var(--muted2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
 }
 
 /* Responsividade */
@@ -289,8 +325,8 @@ body, html {
   .left-panel, .right-panel { height: 50vh; }
   .right-panel { padding: 40px; border-left: none; border-top: 1px solid var(--border); }
   .left-content { padding: 0 20px; align-items: center; text-align: center; }
-  .header-wrapper { flex-direction: column; gap: 12px; margin-bottom: 30px; }
-  .title-group { align-items: center; }
+  .header-wrapper { margin-bottom: 30px; }
+  .title-group { align-items: baseline; }
 }
 </style>
 </head>
@@ -302,13 +338,12 @@ body, html {
   <div class="left-panel">
     <div class="left-content">
       
-      <!-- Cabeçalho agora na esquerda -->
+      <!-- Cabeçalho -->
       <div class="header-wrapper">
         <div class="logo-box">
           <img src="./assets/logo.png" alt="Logo Setup Deck">
         </div>
         <div class="title-group">
-          <!-- O título usa a Squada One para dar o efeito "Letra Caixa" -->
           <h1 class="title">Setup Deck</h1>
           <span class="version-badge">v1.2</span>
         </div>
@@ -317,12 +352,12 @@ body, html {
       <!-- Botão Principal -->
       <a href="https://github.com/Samuel-SSLabs/Setup-Deck/raw/refs/heads/main/setup-deck.exe" class="download-btn" download>
         <span class="btn-icon">↓</span>
-        Baixar Setup Deck
+        Baixe agora!
       </a>
 
       <!-- Download Alternativo -->
       <a href="COLOQUE-O-LINK-ALTERNATIVO-AQUI" class="alt-download" download>
-        Download alternativo (Espelho)
+        Download alternativo
       </a>
 
     </div>
@@ -341,16 +376,30 @@ body, html {
     <ul class="devices-list">
       <li>Core Deck</li>
       <li>Pulse Deck</li>
-      <li>Pro Deck</li>
+      <li>Wave Deck</li>
     </ul>
+
+    <!-- RODAPÉ COM LOGOS (Movido para cá) -->
+    <div class="footer">
+      <div class="footer-label">Powered By</div>
+      <div class="creators-box">
+        <div class="creator">
+          <img src="./assets/logo-sslabs.png" alt="Logo SSLabs">
+          <span>SSLabs</span>
+        </div>
+        
+        <span class="creators-divider">&</span>
+        
+        <div class="creator">
+          <img src="./assets/logo-logicsa.png" alt="Logo Logic S.A.">
+          <span>Logic S.A.</span>
+        </div>
+      </div>
+    </div>
+    <!-- FIM DO RODAPÉ -->
 
   </div>
 
-</div>
-
-<!-- RODAPÉ -->
-<div class="footer">
-  Powered by <span>SSLabs</span> & <span>Logic S.A.</span>
 </div>
 
 </body>
