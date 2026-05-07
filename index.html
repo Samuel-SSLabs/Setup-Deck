@@ -14,7 +14,7 @@
   --s3:        #343442;  --border:    rgba(255,255,255,0.09);
   --border2:   rgba(255,255,255,0.15); --accent:    #e8ff47; 
   --accent2:   rgba(232,255,71,0.18);  --accent3:   rgba(232,255,71,0.08);  
-  --text:      #f4f4f8; --muted:     #8a8a9f;  --muted2:    #5a5a6a;  
+  --text:      #f4f4f8; --muted:      #8a8a9f;  --muted2:    #5a5a6a;  
   --r:  12px; --rs: 8px; font-size: 14px;
 }
 
@@ -32,7 +32,7 @@ body, html {
 .layout {
   display: flex;
   width: 100%;
-  min-height: 100vh; /* Permite que cresça caso precise no mobile */
+  min-height: 100vh;
 }
 
 /* METADE ESQUERDA */
@@ -144,6 +144,28 @@ body, html {
   transform: translateY(-8px); 
 }
 
+/* --- ESTILOS DA CONTAGEM REGRESSIVA E BOTÃO DESABILITADO --- */
+.countdown-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.countdown-timer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 28px;
+  color: var(--accent);
+  background: var(--s2);
+  padding: 10px 24px;
+  border-radius: var(--rs);
+  border: 1px solid var(--border2);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  letter-spacing: 2px;
+}
+
 /* BOTÕES DE DOWNLOAD */
 .download-btn {
   display: inline-flex;
@@ -151,7 +173,7 @@ body, html {
   justify-content: center;
   gap: 12px;
   width: 100%;
-  max-width: 380px; /* Evita que o botão fique largo demais em tablets */
+  max-width: 380px;
   padding: 18px 40px;
   border-radius: var(--rs);
   border: 1px solid var(--accent);
@@ -174,6 +196,16 @@ body, html {
   box-shadow: 0 0 30px rgba(232,255,71,0.25);
 }
 
+.download-btn.disabled {
+  background: var(--s3);
+  color: var(--muted);
+  border-color: var(--border2);
+  cursor: not-allowed;
+  box-shadow: none;
+  pointer-events: none; 
+  transform: none;
+}
+
 .btn-icon {
   font-family: 'JetBrains Mono', monospace;
   font-size: 20px;
@@ -194,6 +226,13 @@ body, html {
 
 .alt-download:hover {
   color: var(--text);
+}
+
+/* Classe extra para desabilitar o link alternativo */
+.alt-download.disabled-link {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
 }
 
 /* METADE DIREITA (Info e Fundo) */
@@ -344,26 +383,24 @@ body, html {
   
   .layout { 
     flex-direction: column; 
-    /* Remove a limitação de altura para permitir que o usuário role a tela para baixo */
   }
 
-  /* Painel de Download (Vai para o topo no Mobile) */
   .left-panel { 
-    padding: 60px 20px; /* Dá espaço para a malha gráfica aparecer */
+    padding: 60px 20px; 
   }
 
   .logo-box {
-    width: 160px; /* Reduz o brilho da logo */
+    width: 160px; 
     height: 160px;
   }
 
   .logo-box img {
-    width: 90px; /* Reduz a logo para não ocupar meia tela */
+    width: 90px; 
     height: 90px;
   }
 
   .title {
-    font-size: 48px; /* Título um pouco menor */
+    font-size: 48px; 
   }
 
   .download-btn {
@@ -371,17 +408,15 @@ body, html {
     padding: 16px 30px;
   }
 
-  /* Painel de Informações (Vai para a base no Mobile) */
   .right-panel { 
-    padding: 50px 24px 120px 24px; /* O 120px no final dá espaço para o rodapé */
+    padding: 50px 24px 120px 24px; 
     border-left: none; 
     border-top: 1px solid var(--border); 
-    align-items: center; /* Centraliza tudo */
+    align-items: center; 
     text-align: center;
   }
 
   .right-panel::after {
-    /* Ajusta o gradiente escuro para combinar com o fluxo vertical */
     background: linear-gradient(to bottom, var(--s1) 0%, rgba(32,32,40,0.6) 100%);
   }
 
@@ -391,10 +426,9 @@ body, html {
   }
 
   .devices-list {
-    align-items: center; /* Centraliza as pílulas das Decks */
+    align-items: center; 
   }
 
-  /* Rodapé fica flutuando na parte inferior desse bloco direito */
   .footer {
     bottom: 30px;
   }
@@ -420,14 +454,18 @@ body, html {
         </div>
       </div>
 
-      <!-- Botão Principal -->
-      <a href="https://github.com/Samuel-SSLabs/Setup-Deck/raw/refs/heads/main/setup-deck.exe" class="download-btn" download>
-        <span class="btn-icon">↓</span>
-        Baixe agora!
-      </a>
+      <!-- Área de Download com Contagem Regressiva -->
+      <div class="countdown-wrapper">
+        <div id="countdown" class="countdown-timer">00:00:00</div>
+        
+        <a href="#" id="mainDownloadBtn" class="download-btn disabled">
+          <span class="btn-icon">🔒</span>
+          <span id="btnText">Aguarde o Lançamento</span>
+        </a>
+      </div>
 
-      <!-- Download Alternativo -->
-      <a href="COLOQUE-O-LINK-ALTERNATIVO-AQUI" class="alt-download" download>
+      <!-- Download Alternativo (Começa Desabilitado) -->
+      <a href="#" id="altDownloadBtn" class="alt-download disabled-link">
         Download alternativo (Espelho)
       </a>
 
@@ -472,6 +510,71 @@ body, html {
   </div>
 
 </div>
+
+<!-- SCRIPT DA CONTAGEM REGRESSIVA -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // A contagem finaliza amanha 08/05 ao meio dia. (Ajuste o ano se necessário)
+    const targetDate = new Date('May 08, 2026 12:00:00').getTime();
+
+    const timerElement = document.getElementById('countdown');
+    const downloadBtn = document.getElementById('mainDownloadBtn');
+    const btnText = document.getElementById('btnText');
+    const btnIcon = document.querySelector('#mainDownloadBtn .btn-icon');
+    
+    // Pegando a referência do botão alternativo
+    const altDownloadBtn = document.getElementById('altDownloadBtn');
+
+    // URLs reais dos seus arquivos
+    const mainDownloadUrl = "https://github.com/Samuel-SSLabs/Setup-Deck/raw/refs/heads/main/setup-deck.exe";
+    const altDownloadUrl = "COLOQUE-O-LINK-ALTERNATIVO-AQUI"; // <-- Adicione seu link espelho aqui
+
+    const interval = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      // Se o tempo acabou (chegou no zero)
+      if (distance <= 0) {
+        clearInterval(interval);
+        
+        // Esconde o relógio
+        timerElement.style.display = 'none'; 
+        
+        // Ativa o botão principal e restaura o link
+        downloadBtn.classList.remove('disabled');
+        downloadBtn.href = mainDownloadUrl;
+        downloadBtn.setAttribute('download', '');
+        btnText.innerText = "Baixe agora!";
+        btnIcon.innerText = "↓";
+        
+        // Ativa o botão alternativo e restaura o link
+        altDownloadBtn.classList.remove('disabled-link');
+        altDownloadBtn.href = altDownloadUrl;
+        altDownloadBtn.setAttribute('download', '');
+        
+        return;
+      }
+
+      // Cálculos matemáticos para dias, horas, minutos e segundos
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      // Função para garantir que fique "09" em vez de "9"
+      const format = (num) => num.toString().padStart(2, '0');
+      
+      let timeString = `${format(hours)}:${format(minutes)}:${format(seconds)}`;
+      
+      // Se faltar mais de 1 dia, exibe os dias também
+      if (days > 0) {
+        timeString = `${days}d ` + timeString;
+      }
+
+      timerElement.innerText = timeString;
+    }, 1000); // Atualiza a cada 1 segundo
+  });
+</script>
 
 </body>
 </html>
