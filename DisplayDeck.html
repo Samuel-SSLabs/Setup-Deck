@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Copa 2026 - Fila Dinâmica</title>
+    <title>Painel Copa 2026 - Fila Dinâmica (Sem Cache)</title>
     <style>
         body {
             background-color: #1a1a1a;
@@ -16,7 +16,7 @@
 
         /* Container Principal */
         .tft-screen {
-            width: 320px; /* Alargado um pouco para acomodar o novo layout horizontal */
+            width: 320px;
             height: 480px; 
             background-color: #000000;
             border: 10px solid #333;
@@ -165,9 +165,8 @@
 
     <script>
         const API_KEY = 'c8c8ceefe660433b89725c5c225fffa7';
-        // Trocado para o Brasileirão (BSA) apenas para garantir que você veja a lista cheia e teste o layout agora mesmo. 
-        // Para voltar para a Copa, troque 'BSA' por 'WC'
-        const URL = 'https://corsproxy.io/?https://api.football-data.org/v4/matches?competitions=WC';
+        // URL oficial da Copa do Mundo (WC)
+        const URL_BASE = 'https://corsproxy.io/?https://api.football-data.org/v4/matches?competitions=WC';
 
         // Função que gera o HTML do bloco da partida com base no seu layout
         function criarBlocoPartida(match, isLive = false) {
@@ -185,10 +184,13 @@
                 infoCentral = match.status === "PAUSED" ? "Intervalo" : "Ao Vivo";
             } else if (match.status === "FINISHED") {
                 infoCentral = "Encerrado";
-            } else {
+            } else if (match.status === "TIMED" || match.status === "SCHEDULED") {
                 // Formata o horário (ex: 16:00)
                 const dataJogo = new Date(match.utcDate);
                 infoCentral = dataJogo.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            } else {
+                // Se a API mandar algum status desconhecido, mostra na tela para debug
+                infoCentral = match.status; 
             }
 
             const liveClass = isLive ? "live" : "";
@@ -224,20 +226,18 @@
             
             debugLog.innerText = "Atualizando...";
 
-            try {
-                // 1. Gera um número único baseado no relógio atual do computador
+            // O SEGREDO DO CACHE BUSTER: Gera um número baseado no milissegundo atual
             const timestamp = new Date().getTime();
-            
-            // 2. Anexa esse número no final da URL para forçar uma busca nova
-            const urlSemCache = `${URL}&nocache=${timestamp}`;
+            const urlSemCache = `${URL_BASE}&nocache=${timestamp}`;
 
             try {
-                // 3. Adiciona a trava extra "cache: 'no-store'" no pedido
+                // A tag cache: 'no-store' também avisa o navegador para não guardar o arquivo
                 const response = await fetch(urlSemCache, { 
                     method: 'GET',
                     headers: { 'X-Auth-Token': API_KEY },
-                    cache: 'no-store'
+                    cache: 'no-store' 
                 });
+                
                 if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
                 
                 const data = await response.json();
@@ -280,7 +280,7 @@
 
                     // --- RENDERIZAR O HISTÓRICO (Rodapé) ---
                     if (encerrados.length > 0) {
-                        // Pega apenas o índice [0], que é o mais recente graças à ordenação acima
+                        // Pega apenas o índice [0], que é o mais recente graças à ordenação
                         historyContent.innerHTML = criarBlocoPartida(encerrados[0], false);
                     } else {
                         historyContent.innerHTML = '<div style="color: #555; text-align: center; font-size: 12px;">Nenhum jogo finalizado hoje</div>';
@@ -296,8 +296,9 @@
             }
         }
 
+        // Roda a primeira vez e depois entra no loop de 30 segundos
         atualizarPainel();
-        setInterval(atualizarPainel, 30000); // Loop de 30 segundos
+        setInterval(atualizarPainel, 30000); 
     </script>
 </body>
 </html>
