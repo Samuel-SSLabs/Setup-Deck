@@ -2,9 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Copa 2026 - Simulador Fiel</title>
+    <title>Painel Copa 2026 - Fila Dinâmica</title>
     <style>
-        /* Fundo da página */
         body {
             background-color: #1a1a1a;
             display: flex;
@@ -15,98 +14,125 @@
             font-family: 'Courier New', Courier, monospace;
         }
 
-        /* Container simulando a tela ST7735 (Proporção Exata 2x: 256x320) */
+        /* Container Principal */
         .tft-screen {
-            width: 256px;
-            height: 320px;
-            background-color: #000000; /* TFT_BLACK */
+            width: 320px; /* Alargado um pouco para acomodar o novo layout horizontal */
+            height: 480px; 
+            background-color: #000000;
             border: 10px solid #333;
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
             position: relative;
         }
 
-        /* tft.fillRect(0, 0, 128, 25, TFT_DARKGREEN); */
         .header {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 50px; /* 25 * 2 */
             background-color: #006400;
             color: #FFFFFF;
+            height: 40px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
-            border-bottom: 2px solid #FFFFFF; /* tft.drawLine(...) */
+            border-bottom: 2px solid #FFFFFF;
+            flex-shrink: 0;
         }
 
-        /* tft.drawCentreString(status, 64, 38, 1); */
-        .status {
-            position: absolute;
-            top: 76px; /* 38 * 2 */
-            width: 100%;
+        /* Área da Fila (Ao Vivo e Próximos) */
+        .game-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #000;
+        }
+        .game-list::-webkit-scrollbar { width: 0px; }
+
+        /* Rodapé: Bloco Histórico */
+        .history-block {
+            background-color: #1c1c1c;
+            border-top: 2px dashed #555;
+            padding: 10px;
+            flex-shrink: 0;
+        }
+
+        .history-title {
+            color: #A9A9A9;
+            font-size: 12px;
             text-align: center;
-            color: #FFA500; /* TFT_ORANGE */
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Estrutura do Bloco da Partida */
+        .match-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #111;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px 5px;
+            margin-bottom: 10px;
+            color: #FFF;
+        }
+
+        .match-block.live {
+            border-color: #FFA500;
+            background-color: #221500;
+        }
+
+        /* Lados (Logo + Sigla) */
+        .team-side {
+            display: flex;
+            align-items: center;
+            width: 30%;
+        }
+        .team-side.right {
+            justify-content: flex-end;
+        }
+
+        .team-logo {
+            width: 25px;
+            height: 25px;
+            object-fit: contain;
+            margin: 0 5px;
+        }
+
+        .tla {
             font-size: 16px;
+            font-weight: bold;
         }
 
-        /* Nomes dos Times (Y = 65) */
-        .team-a, .team-b {
-            position: absolute;
-            top: 130px; /* 65 * 2 */
-            color: #FFFFFF; /* TFT_WHITE */
-            font-size: 24px;
+        /* Centro (Placar + Status/Hora) */
+        .center-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 40%;
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
             font-weight: bold;
-            width: 60px;
-            text-align: center;
-            transform: translateX(-50%); /* Centraliza no ponto exato */
+        }
+
+        .status-time {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #A9A9A9;
         }
         
-        .team-a { left: 60px; /* 30 * 2 */ }
-        .team-b { left: 196px; /* 98 * 2 */ }
-
-        /* Placares - Números Gigantes (Y = 90) */
-        .score-a, .score-b {
-            position: absolute;
-            top: 180px; /* 90 * 2 */
-            color: #FFFFFF; /* TFT_WHITE */
-            font-size: 48px; /* Simulando LOAD_FONT4 */
+        .live .status-time {
+            color: #FFA500;
             font-weight: bold;
-            width: 60px;
-            text-align: center;
-            transform: translateX(-50%);
-        }
-
-        .score-a { left: 60px; }
-        .score-b { left: 196px; }
-
-        /* O 'X' no meio (Y = 95) */
-        .versus {
-            position: absolute;
-            top: 190px; /* 95 * 2 */
-            left: 128px; /* 64 * 2 */
-            color: #FF0000; /* TFT_RED */
-            font-size: 28px;
-            font-weight: bold;
-            transform: translateX(-50%);
-        }
-
-        /* tft.fillRect(0, 145, 128, 15, TFT_DARKGREY); */
-        .footer {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 30px; /* 15 * 2 */
-            background-color: #696969; /* TFT_DARKGREY */
-            color: #FFFFFF;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
         }
 
         #debug-log {
@@ -114,88 +140,152 @@
             top: 20px;
             left: 20px;
             color: #00FF00;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
 
-    <div id="debug-log">Pronto para buscar dados...</div>
+    <div id="debug-log">Iniciando sistema...</div>
 
     <div class="tft-screen">
         <div class="header">COPA 2026</div>
         
-        <div class="status" id="status-text">Carregando...</div>
-        
-        <div class="team-a" id="team-a">---</div>
-        <div class="team-b" id="team-b">---</div>
-        
-        <div class="score-a" id="score-a">0</div>
-        <div class="versus">X</div>
-        <div class="score-b" id="score-b">0</div>
-        
-        <div class="footer">Atualizando ao vivo</div>
+        <div class="game-list" id="main-queue">
+            <div style="color: white; text-align: center; margin-top: 50px;">Sincronizando partidas...</div>
+        </div>
+
+        <div class="history-block" id="history-queue">
+            <div class="history-title">Último Resultado</div>
+            <div id="history-content">
+                <div style="color: #555; text-align: center; font-size: 12px;">Nenhum jogo finalizado</div>
+            </div>
+        </div>
     </div>
 
     <script>
         const API_KEY = 'c8c8ceefe660433b89725c5c225fffa7';
-        // URL da API com Proxy CORS para rodar no navegador
-        const URL = 'https://corsproxy.io/?https://api.football-data.org/v4/matches?competitions=WC';
+        // Trocado para o Brasileirão (BSA) apenas para garantir que você veja a lista cheia e teste o layout agora mesmo. 
+        // Para voltar para a Copa, troque 'BSA' por 'WC'
+        const URL = 'https://corsproxy.io/?https://api.football-data.org/v4/matches?competitions=BSA';
 
-        async function buscarDadosCopa() {
+        // Função que gera o HTML do bloco da partida com base no seu layout
+        function criarBlocoPartida(match, isLive = false) {
+            const siglaA = match.homeTeam.tla || "---";
+            const siglaB = match.awayTeam.tla || "---";
+            const logoA = match.homeTeam.crest || "";
+            const logoB = match.awayTeam.crest || "";
+            
+            const golA = match.score.fullTime.home !== null ? match.score.fullTime.home : "-";
+            const golB = match.score.fullTime.away !== null ? match.score.fullTime.away : "-";
+
+            let infoCentral = "";
+            
+            if (match.status === "IN_PLAY" || match.status === "PAUSED") {
+                infoCentral = match.status === "PAUSED" ? "Intervalo" : "Ao Vivo";
+            } else if (match.status === "FINISHED") {
+                infoCentral = "Encerrado";
+            } else {
+                // Formata o horário (ex: 16:00)
+                const dataJogo = new Date(match.utcDate);
+                infoCentral = dataJogo.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            }
+
+            const liveClass = isLive ? "live" : "";
+
+            return `
+                <div class="match-block ${liveClass}">
+                    <div class="team-side">
+                        <img src="${logoA}" class="team-logo" alt="${siglaA}">
+                        <span class="tla">${siglaA}</span>
+                    </div>
+                    
+                    <div class="center-info">
+                        <div class="score-row">
+                            <span>${golA}</span>
+                            <span style="font-size: 14px; color: #555;">x</span>
+                            <span>${golB}</span>
+                        </div>
+                        <span class="status-time">${infoCentral}</span>
+                    </div>
+
+                    <div class="team-side right">
+                        <span class="tla">${siglaB}</span>
+                        <img src="${logoB}" class="team-logo" alt="${siglaB}">
+                    </div>
+                </div>
+            `;
+        }
+
+        async function atualizarPainel() {
             const debugLog = document.getElementById('debug-log');
-            debugLog.innerText = "Sincronizando com a API...";
+            const mainQueue = document.getElementById('main-queue');
+            const historyContent = document.getElementById('history-content');
+            
+            debugLog.innerText = "Atualizando...";
 
             try {
-                const response = await fetch(URL, {
-                    method: 'GET',
-                    headers: { 'X-Auth-Token': API_KEY }
-                });
-
+                const response = await fetch(URL, { headers: { 'X-Auth-Token': API_KEY } });
                 if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-
+                
                 const data = await response.json();
-                debugLog.innerText = "Atualizado com sucesso!";
+                debugLog.innerText = `OK! Jogos no array: ${data.resultSet.count}`;
 
                 if (data.resultSet.count > 0) {
-                    const match = data.matches[0]; // Pega a primeira partida
-
-                    document.getElementById('team-a').innerText = match.homeTeam.tla || "---";
-                    document.getElementById('team-b').innerText = match.awayTeam.tla || "---";
-
-                    const golHome = match.score.fullTime.home;
-                    const golAway = match.score.fullTime.away;
                     
-                    document.getElementById('score-a').innerText = golHome !== null ? golHome : "0";
-                    document.getElementById('score-b').innerText = golAway !== null ? golAway : "0";
+                    // Arrays para separar a fila
+                    const aoVivo = [];
+                    const proximos = [];
+                    const encerrados = [];
 
-                    let statusAPI = match.status;
-                    let statusTela = "Aguardando";
+                    // Distribuição das partidas
+                    data.matches.forEach(match => {
+                        if (match.status === "IN_PLAY" || match.status === "PAUSED") aoVivo.push(match);
+                        else if (match.status === "FINISHED") encerrados.push(match);
+                        else proximos.push(match); // TIMED, SCHEDULED
+                    });
+
+                    // Ordena os próximos para o mais cedo aparecer primeiro
+                    proximos.sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
                     
-                    if (statusAPI === "IN_PLAY") statusTela = "Ao Vivo";
-                    else if (statusAPI === "PAUSED") statusTela = "Intervalo";
-                    else if (statusAPI === "FINISHED") statusTela = "Encerrado";
-                    else if (statusAPI === "TIMED") statusTela = "Hoje";
+                    // Ordena os encerrados do mais recente para o mais antigo
+                    encerrados.sort((a, b) => new Date(b.utcDate) - new Date(a.utcDate));
 
-                    document.getElementById('status-text').innerText = statusTela;
+                    // --- RENDERIZAR A FILA PRINCIPAL ---
+                    mainQueue.innerHTML = "";
+                    
+                    aoVivo.forEach(match => {
+                        mainQueue.innerHTML += criarBlocoPartida(match, true);
+                    });
+                    
+                    proximos.forEach(match => {
+                        mainQueue.innerHTML += criarBlocoPartida(match, false);
+                    });
+
+                    if (aoVivo.length === 0 && proximos.length === 0) {
+                        mainQueue.innerHTML = '<div style="color: #777; text-align: center; margin-top: 30px;">Sem jogos em andamento ou próximos.</div>';
+                    }
+
+                    // --- RENDERIZAR O HISTÓRICO (Rodapé) ---
+                    if (encerrados.length > 0) {
+                        // Pega apenas o índice [0], que é o mais recente graças à ordenação acima
+                        historyContent.innerHTML = criarBlocoPartida(encerrados[0], false);
+                    } else {
+                        historyContent.innerHTML = '<div style="color: #555; text-align: center; font-size: 12px;">Nenhum jogo finalizado hoje</div>';
+                    }
 
                 } else {
-                    document.getElementById('status-text').innerText = "Sem jogos hoje";
-                    document.getElementById('team-a').innerText = "---";
-                    document.getElementById('team-b').innerText = "---";
-                    document.getElementById('score-a').innerText = "0";
-                    document.getElementById('score-b').innerText = "0";
+                    mainQueue.innerHTML = '<div style="color: #FFA500; text-align: center; margin-top: 50px;">Sem jogos programados para hoje.</div>';
                 }
 
             } catch (erro) {
-                console.error("Falha:", erro);
-                debugLog.innerText = `Erro: ${erro.message}`;
+                debugLog.innerText = `Erro de Conexão`;
                 debugLog.style.color = "#FF0000";
-                document.getElementById('status-text').innerText = "ERRO DE REDE";
             }
         }
 
-        buscarDadosCopa();
-        setInterval(buscarDadosCopa, 30000); // 30 segundos, igual ao C++
+        atualizarPainel();
+        setInterval(atualizarPainel, 30000); // Loop de 30 segundos
     </script>
 </body>
 </html>
