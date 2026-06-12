@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Copa 2026 - Fila Dinâmica (API Direta)</title>
+    <title>Painel Copa 2026</title>
     <style>
         body {
             background-color: #1a1a1a;
@@ -14,7 +14,6 @@
             font-family: 'Courier New', Courier, monospace;
         }
 
-        /* Container Principal */
         .tft-screen {
             width: 320px;
             height: 480px; 
@@ -41,7 +40,6 @@
             flex-shrink: 0;
         }
 
-        /* Área da Fila (Ao Vivo e Próximos) */
         .game-list {
             flex-grow: 1;
             overflow-y: auto;
@@ -50,7 +48,6 @@
         }
         .game-list::-webkit-scrollbar { width: 0px; }
 
-        /* Rodapé: Bloco Histórico */
         .history-block {
             background-color: #1c1c1c;
             border-top: 2px dashed #555;
@@ -67,7 +64,6 @@
             letter-spacing: 1px;
         }
 
-        /* Estrutura do Bloco da Partida */
         .match-block {
             display: flex;
             justify-content: space-between;
@@ -85,7 +81,6 @@
             background-color: #221500;
         }
 
-        /* Lados (Logo + Sigla) */
         .team-side {
             display: flex;
             align-items: center;
@@ -107,7 +102,6 @@
             font-weight: bold;
         }
 
-        /* Centro (Placar + Status/Hora) */
         .center-info {
             display: flex;
             flex-direction: column;
@@ -137,37 +131,35 @@
 
         #debug-log {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 10px;
+            left: 10px;
             color: #00FF00;
-            font-size: 12px;
+            font-size: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div id="debug-log">Iniciando sistema...</div>
+    <div id="debug-log">Conectando...</div>
 
     <div class="tft-screen">
         <div class="header">COPA 2026</div>
         
         <div class="game-list" id="main-queue">
-            <div style="color: white; text-align: center; margin-top: 50px;">Sincronizando partidas...</div>
+            <div style="color: white; text-align: center; margin-top: 50px;">Carregando...</div>
         </div>
 
-        <div class="history-block" id="history-queue">
+        <div class="history-block">
             <div class="history-title">Último Resultado</div>
             <div id="history-content">
-                <div style="color: #555; text-align: center; font-size: 12px;">Nenhum jogo finalizado</div>
+                <div style="color: #555; text-align: center; font-size: 12px;">Aguardando dados...</div>
             </div>
         </div>
     </div>
 
     <script>
-        const API_KEY = 'c8c8ceefe660433b89725c5c225fffa7';
-        
-        // --- URL DIRETA SEM O PROXY ---
-        const URL_BASE = 'https://api.football-data.org/v4/matches?competitions=WC';
+        // Sua URL do Worker (Proxy Privado)
+        const URL_PROXY = 'https://proud-sky-72e9.samuelrochalemes20042014.workers.dev/v4/matches?competitions=WC';
 
         function criarBlocoPartida(match, isLive = false) {
             const siglaA = match.homeTeam.tla || "---";
@@ -179,36 +171,24 @@
             const golB = match.score.fullTime.away !== null ? match.score.fullTime.away : "-";
 
             let infoCentral = "";
-            
-            if (match.status === "IN_PLAY" || match.status === "PAUSED") {
-                infoCentral = match.status === "PAUSED" ? "Intervalo" : "Ao Vivo";
-            } else if (match.status === "FINISHED") {
-                infoCentral = "Encerrado";
-            } else if (match.status === "TIMED" || match.status === "SCHEDULED") {
+            if (match.status === "IN_PLAY") infoCentral = "Ao Vivo";
+            else if (match.status === "PAUSED") infoCentral = "Intervalo";
+            else if (match.status === "FINISHED") infoCentral = "Encerrado";
+            else {
                 const dataJogo = new Date(match.utcDate);
                 infoCentral = dataJogo.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            } else {
-                infoCentral = match.status; 
             }
 
-            const liveClass = isLive ? "live" : "";
-
             return `
-                <div class="match-block ${liveClass}">
+                <div class="match-block ${isLive ? 'live' : ''}">
                     <div class="team-side">
                         <img src="${logoA}" class="team-logo" alt="${siglaA}">
                         <span class="tla">${siglaA}</span>
                     </div>
-                    
                     <div class="center-info">
-                        <div class="score-row">
-                            <span>${golA}</span>
-                            <span style="font-size: 14px; color: #555;">x</span>
-                            <span>${golB}</span>
-                        </div>
+                        <div class="score-row"><span>${golA}</span><span style="font-size: 14px; color: #555;">x</span><span>${golB}</span></div>
                         <span class="status-time">${infoCentral}</span>
                     </div>
-
                     <div class="team-side right">
                         <span class="tla">${siglaB}</span>
                         <img src="${logoB}" class="team-logo" alt="${siglaB}">
@@ -222,66 +202,33 @@
             const mainQueue = document.getElementById('main-queue');
             const historyContent = document.getElementById('history-content');
             
-            debugLog.innerText = "Atualizando...";
-
-            // O Cache Buster continua aqui anexado à URL direta
-            const timestamp = new Date().getTime();
-            const urlSemCache = `${URL_BASE}&nocache=${timestamp}`;
+            // Timestamp para forçar nova requisição e evitar cache do navegador
+            const urlFinal = `${URL_PROXY}&nocache=${new Date().getTime()}`;
 
             try {
-                const response = await fetch(urlSemCache, { 
-                    method: 'GET',
-                    headers: { 'X-Auth-Token': API_KEY },
-                    cache: 'no-store' 
-                });
-                
-                if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
-                
+                const response = await fetch(urlFinal, { cache: 'no-store' });
+                if (!response.ok) throw new Error();
                 const data = await response.json();
-                debugLog.innerText = `OK! Jogos no array: ${data.resultSet.count}`;
+                
+                debugLog.innerText = "Online";
 
-                if (data.resultSet.count > 0) {
-                    
-                    const aoVivo = [];
-                    const proximos = [];
-                    const encerrados = [];
+                const aoVivo = [], proximos = [], encerrados = [];
+                data.matches.forEach(m => {
+                    if (m.status === "IN_PLAY" || m.status === "PAUSED") aoVivo.push(m);
+                    else if (m.status === "FINISHED") encerrados.push(m);
+                    else proximos.push(m);
+                });
 
-                    data.matches.forEach(match => {
-                        if (match.status === "IN_PLAY" || match.status === "PAUSED") aoVivo.push(match);
-                        else if (match.status === "FINISHED") encerrados.push(match);
-                        else proximos.push(match);
-                    });
+                proximos.sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
+                encerrados.sort((a, b) => new Date(b.utcDate) - new Date(a.utcDate));
 
-                    proximos.sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
-                    encerrados.sort((a, b) => new Date(b.utcDate) - new Date(a.utcDate));
+                mainQueue.innerHTML = "";
+                [...aoVivo, ...proximos].forEach(m => mainQueue.innerHTML += criarBlocoPartida(m, m.status === "IN_PLAY"));
+                
+                historyContent.innerHTML = encerrados.length > 0 ? criarBlocoPartida(encerrados[0]) : "Sem resultados";
 
-                    mainQueue.innerHTML = "";
-                    
-                    aoVivo.forEach(match => {
-                        mainQueue.innerHTML += criarBlocoPartida(match, true);
-                    });
-                    
-                    proximos.forEach(match => {
-                        mainQueue.innerHTML += criarBlocoPartida(match, false);
-                    });
-
-                    if (aoVivo.length === 0 && proximos.length === 0) {
-                        mainQueue.innerHTML = '<div style="color: #777; text-align: center; margin-top: 30px;">Sem jogos em andamento ou próximos.</div>';
-                    }
-
-                    if (encerrados.length > 0) {
-                        historyContent.innerHTML = criarBlocoPartida(encerrados[0], false);
-                    } else {
-                        historyContent.innerHTML = '<div style="color: #555; text-align: center; font-size: 12px;">Nenhum jogo finalizado hoje</div>';
-                    }
-
-                } else {
-                    mainQueue.innerHTML = '<div style="color: #FFA500; text-align: center; margin-top: 50px;">Sem jogos programados para hoje.</div>';
-                }
-
-            } catch (erro) {
-                debugLog.innerText = `Erro de Conexão`;
-                debugLog.style.color = "#FF0000";
+            } catch (e) {
+                debugLog.innerText = "Erro de conexão";
             }
         }
 
