@@ -225,7 +225,19 @@
             debugLog.innerText = "Atualizando...";
 
             try {
-                const response = await fetch(URL, { headers: { 'X-Auth-Token': API_KEY } });
+                // 1. Gera um número único baseado no relógio atual do computador
+            const timestamp = new Date().getTime();
+            
+            // 2. Anexa esse número no final da URL para forçar uma busca nova
+            const urlSemCache = `${URL}&nocache=${timestamp}`;
+
+            try {
+                // 3. Adiciona a trava extra "cache: 'no-store'" no pedido
+                const response = await fetch(urlSemCache, { 
+                    method: 'GET',
+                    headers: { 'X-Auth-Token': API_KEY },
+                    cache: 'no-store'
+                });
                 if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
                 
                 const data = await response.json();
