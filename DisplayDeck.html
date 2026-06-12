@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Copa 2026 - Fila Dinâmica (Sem Cache)</title>
+    <title>Painel Copa 2026 - Fila Dinâmica (API Direta)</title>
     <style>
         body {
             background-color: #1a1a1a;
@@ -165,10 +165,10 @@
 
     <script>
         const API_KEY = 'c8c8ceefe660433b89725c5c225fffa7';
-        // URL oficial da Copa do Mundo (WC)
-        const URL_BASE = 'https://corsproxy.io/?https://api.football-data.org/v4/matches?competitions=WC';
+        
+        // --- URL DIRETA SEM O PROXY ---
+        const URL_BASE = 'https://api.football-data.org/v4/matches?competitions=WC';
 
-        // Função que gera o HTML do bloco da partida com base no seu layout
         function criarBlocoPartida(match, isLive = false) {
             const siglaA = match.homeTeam.tla || "---";
             const siglaB = match.awayTeam.tla || "---";
@@ -185,11 +185,9 @@
             } else if (match.status === "FINISHED") {
                 infoCentral = "Encerrado";
             } else if (match.status === "TIMED" || match.status === "SCHEDULED") {
-                // Formata o horário (ex: 16:00)
                 const dataJogo = new Date(match.utcDate);
                 infoCentral = dataJogo.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             } else {
-                // Se a API mandar algum status desconhecido, mostra na tela para debug
                 infoCentral = match.status; 
             }
 
@@ -226,12 +224,11 @@
             
             debugLog.innerText = "Atualizando...";
 
-            // O SEGREDO DO CACHE BUSTER: Gera um número baseado no milissegundo atual
+            // O Cache Buster continua aqui anexado à URL direta
             const timestamp = new Date().getTime();
             const urlSemCache = `${URL_BASE}&nocache=${timestamp}`;
 
             try {
-                // A tag cache: 'no-store' também avisa o navegador para não guardar o arquivo
                 const response = await fetch(urlSemCache, { 
                     method: 'GET',
                     headers: { 'X-Auth-Token': API_KEY },
@@ -245,25 +242,19 @@
 
                 if (data.resultSet.count > 0) {
                     
-                    // Arrays para separar a fila
                     const aoVivo = [];
                     const proximos = [];
                     const encerrados = [];
 
-                    // Distribuição das partidas
                     data.matches.forEach(match => {
                         if (match.status === "IN_PLAY" || match.status === "PAUSED") aoVivo.push(match);
                         else if (match.status === "FINISHED") encerrados.push(match);
-                        else proximos.push(match); // TIMED, SCHEDULED
+                        else proximos.push(match);
                     });
 
-                    // Ordena os próximos para o mais cedo aparecer primeiro
                     proximos.sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
-                    
-                    // Ordena os encerrados do mais recente para o mais antigo
                     encerrados.sort((a, b) => new Date(b.utcDate) - new Date(a.utcDate));
 
-                    // --- RENDERIZAR A FILA PRINCIPAL ---
                     mainQueue.innerHTML = "";
                     
                     aoVivo.forEach(match => {
@@ -278,9 +269,7 @@
                         mainQueue.innerHTML = '<div style="color: #777; text-align: center; margin-top: 30px;">Sem jogos em andamento ou próximos.</div>';
                     }
 
-                    // --- RENDERIZAR O HISTÓRICO (Rodapé) ---
                     if (encerrados.length > 0) {
-                        // Pega apenas o índice [0], que é o mais recente graças à ordenação
                         historyContent.innerHTML = criarBlocoPartida(encerrados[0], false);
                     } else {
                         historyContent.innerHTML = '<div style="color: #555; text-align: center; font-size: 12px;">Nenhum jogo finalizado hoje</div>';
@@ -296,7 +285,6 @@
             }
         }
 
-        // Roda a primeira vez e depois entra no loop de 30 segundos
         atualizarPainel();
         setInterval(atualizarPainel, 30000); 
     </script>
