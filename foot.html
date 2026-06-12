@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Copa 2026 - Simulador ESP32</title>
+    <style>
+        /* Fundo da página para dar destaque à "tela" */
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace; /* Fonte estilo Terminal/LCD */
+        }
+
+        /* Container simulando a tela ST7735 em escala 2x (256x320) */
+        .tft-screen {
+            width: 256px;
+            height: 320px;
+            background-color: #000000; /* TFT_BLACK */
+            border: 10px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cabeçalho */
+        .header {
+            background-color: #006400; /* TFT_DARKGREEN */
+            color: #FFFFFF; /* TFT_WHITE */
+            height: 50px; /* 25px em escala 2x */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            border-bottom: 2px solid #FFFFFF; /* Linha de detalhe branca */
+        }
+
+        /* Área do Jogo */
+        .game-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 15px;
+        }
+
+        .status {
+            color: #FFA500; /* TFT_ORANGE */
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        /* Container do Placar */
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 80%;
+        }
+
+        .team {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #FFFFFF; /* TFT_WHITE */
+        }
+
+        .team-name {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .score {
+            font-size: 48px; /* Simulando LOAD_FONT4 */
+            font-weight: bold;
+        }
+
+        .versus {
+            color: #FF0000; /* TFT_RED */
+            font-size: 24px;
+            margin-top: 35px; /* Alinhado visualmente no meio do placar */
+        }
+
+        /* Rodapé */
+        .footer {
+            background-color: #A9A9A9; /* TFT_DARKGREY */
+            color: #FFFFFF;
+            height: 30px; /* 15px em escala 2x */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        /* Status da requisição (Fora da tela do ESP32) */
+        #debug-log {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #00FF00;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="debug-log">Pronto para buscar dados...</div>
+
+    <div class="tft-screen">
+        <div class="header">COPA 2026</div>
+        
+        <div class="game-area">
+            <div class="status" id="status-text">Carregando...</div>
+            
+            <div class="scoreboard">
+                <div class="team">
+                    <div class="team-name" id="team-a">---</div>
+                    <div class="score" id="score-a">0</div>
+                </div>
+                
+                <div class="versus">X</div>
+                
+                <div class="team">
+                    <div class="team-name" id="team-b">---</div>
+                    <div class="score" id="score-b">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">Atualizando ao vivo</div>
+    </div>
+
+    <script>
+        const API_KEY = 'c8c8ceefe660433b89725c5c225fffa7';
+        
+        // Colocamos um Proxy na frente da URL original para driblar a segurança do navegador
+        const URL = 'https://corsproxy.io/?https://api.football-data.org/v4/matches?competitions=WC';
+
+        async function buscarDadosCopa() {
+            const debugLog = document.getElementById('debug-log');
+            debugLog.innerText = "Fazendo requisição HTTP...";
+
+            try {
+                const response = await fetch(URL, {
+                    method: 'GET',
+                    headers: {
+                        'X-Auth-Token': API_KEY
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+                debugLog.innerText = "Dados recebidos com sucesso!";
+
+                if (data.resultSet.count > 0) {
+                    const match = data.matches[0]; // Pegando o primeiro jogo do dia
+
+                    // Nomes
+                    document.getElementById('team-a').innerText = match.homeTeam.tla || "---";
+                    document.getElementById('team-b').innerText = match.awayTeam.tla || "---";
+
+                    // Gols (Tratando caso o jogo ainda não tenha começado e venha null)
+                    let golHome = match.score.fullTime.home;
+                    let golAway = match.score.fullTime.away;
+                    
+                    document.getElementById('score-a').innerText = golHome !== null ? golHome : "0";
+                    document.getElementById('score-b').innerText = golAway !== null ? golAway : "0";
+
+                    // Status
+                    let statusAPI = match.status;
+                    let statusTela = "Aguardando";
+                    
+                    if (statusAPI === "IN_PLAY") statusTela = "Ao Vivo";
+                    else if (statusAPI === "PAUSED") statusTela = "Intervalo";
+                    else if (statusAPI === "FINISHED") statusTela = "Encerrado";
+                    else if (statusAPI === "TIMED") statusTela = "Hoje";
+
+                    document.getElementById('status-text').innerText = statusTela;
+
+                } else {
+                    document.getElementById('status-text').innerText = "Sem jogos hoje";
+                    document.getElementById('team-a').innerText = "---";
+                    document.getElementById('team-b').innerText = "---";
+                }
+
+            } catch (erro) {
+                console.error("Falha ao buscar dados da API:", erro);
+                debugLog.innerText = `Erro de Conexão: ${erro.message}`;
+                debugLog.style.color = "#FF0000";
+                document.getElementById('status-text').innerText = "ERRO DE REDE";
+            }
+        }
+
+        // Executa a busca assim que abrir a página
+        buscarDadosCopa();
+
+        // Atualiza os dados a cada 30 segundos (simulando o loop do C++)
+        setInterval(buscarDadosCopa, 30000);
+    </script>
+
+</body>
+</html>
