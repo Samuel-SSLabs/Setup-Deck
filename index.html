@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Copa 2026 - Simulador ESP32</title>
+    <title>Painel Copa 2026 - Simulador Fiel</title>
     <style>
         /* Fundo da página */
         body {
@@ -15,109 +15,98 @@
             font-family: 'Courier New', Courier, monospace;
         }
 
-        /* Container simulando a tela ST7735 (Proporção 256x320) */
+        /* Container simulando a tela ST7735 (Proporção Exata 2x: 256x320) */
         .tft-screen {
             width: 256px;
             height: 320px;
-            background-color: #000000;
+            background-color: #000000; /* TFT_BLACK */
             border: 10px solid #333;
             border-radius: 8px;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
             position: relative;
         }
 
-        /* Cabeçalho */
+        /* tft.fillRect(0, 0, 128, 25, TFT_DARKGREEN); */
         .header {
-            background-color: #006400; /* TFT_DARKGREEN */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px; /* 25 * 2 */
+            background-color: #006400;
             color: #FFFFFF;
-            height: 40px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
-            border-bottom: 2px solid #FFFFFF;
-            flex-shrink: 0;
+            border-bottom: 2px solid #FFFFFF; /* tft.drawLine(...) */
         }
 
-        /* Área de Listagem com Scroll nativo escondido */
-        .game-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 10px 5px;
-            background-color: #000;
+        /* tft.drawCentreString(status, 64, 38, 1); */
+        .status {
+            position: absolute;
+            top: 76px; /* 38 * 2 */
+            width: 100%;
+            text-align: center;
+            color: #FFA500; /* TFT_ORANGE */
+            font-size: 16px;
+        }
+
+        /* Nomes dos Times (Y = 65) */
+        .team-a, .team-b {
+            position: absolute;
+            top: 130px; /* 65 * 2 */
+            color: #FFFFFF; /* TFT_WHITE */
+            font-size: 24px;
+            font-weight: bold;
+            width: 60px;
+            text-align: center;
+            transform: translateX(-50%); /* Centraliza no ponto exato */
         }
         
-        /* Esconde a barra de rolagem visualmente, mas permite o scroll */
-        .game-list::-webkit-scrollbar { width: 0px; }
+        .team-a { left: 60px; /* 30 * 2 */ }
+        .team-b { left: 196px; /* 98 * 2 */ }
 
-        /* Card individual de cada partida */
-        .match-card {
-            border-bottom: 1px dashed #555;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .match-card:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-
-        .status {
-            color: #FFA500; /* TFT_ORANGE */
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .scoreboard {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            color: #FFFFFF;
-        }
-
-        .team {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 40%;
-        }
-
-        .team-logo {
-            width: 35px;
-            height: 35px;
-            object-fit: contain;
-            margin-bottom: 5px;
-        }
-
-        .team-name {
-            font-size: 16px;
+        /* Placares - Números Gigantes (Y = 90) */
+        .score-a, .score-b {
+            position: absolute;
+            top: 180px; /* 90 * 2 */
+            color: #FFFFFF; /* TFT_WHITE */
+            font-size: 48px; /* Simulando LOAD_FONT4 */
             font-weight: bold;
+            width: 60px;
+            text-align: center;
+            transform: translateX(-50%);
         }
 
-        .score {
+        .score-a { left: 60px; }
+        .score-b { left: 196px; }
+
+        /* O 'X' no meio (Y = 95) */
+        .versus {
+            position: absolute;
+            top: 190px; /* 95 * 2 */
+            left: 128px; /* 64 * 2 */
+            color: #FF0000; /* TFT_RED */
             font-size: 28px;
             font-weight: bold;
-            width: 20%;
-            text-align: center;
+            transform: translateX(-50%);
         }
 
-        /* Rodapé */
+        /* tft.fillRect(0, 145, 128, 15, TFT_DARKGREY); */
         .footer {
-            background-color: #A9A9A9; /* TFT_DARKGREY */
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px; /* 15 * 2 */
+            background-color: #696969; /* TFT_DARKGREY */
             color: #FFFFFF;
-            height: 25px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 11px;
-            flex-shrink: 0;
+            font-size: 12px;
         }
 
         #debug-log {
@@ -125,35 +114,36 @@
             top: 20px;
             left: 20px;
             color: #00FF00;
-            max-width: 200px;
         }
     </style>
 </head>
 <body>
 
-    <div id="debug-log">Iniciando sistema...</div>
+    <div id="debug-log">Pronto para buscar dados...</div>
 
     <div class="tft-screen">
         <div class="header">COPA 2026</div>
         
-        <div class="game-list" id="game-list">
-            <div style="color: white; text-align: center; margin-top: 50px;">Carregando dados...</div>
-        </div>
-
+        <div class="status" id="status-text">Carregando...</div>
+        
+        <div class="team-a" id="team-a">---</div>
+        <div class="team-b" id="team-b">---</div>
+        
+        <div class="score-a" id="score-a">0</div>
+        <div class="versus">X</div>
+        <div class="score-b" id="score-b">0</div>
+        
         <div class="footer">Atualizando ao vivo</div>
     </div>
 
     <script>
         const API_KEY = 'c8c8ceefe660433b89725c5c225fffa7';
-        
-        // Proxy CORS para não ser bloqueado pelo navegador + Filtro da Copa (WC)
+        // URL da API com Proxy CORS para rodar no navegador
         const URL = 'https://corsproxy.io/?https://api.football-data.org/v4/matches?competitions=WC';
 
         async function buscarDadosCopa() {
             const debugLog = document.getElementById('debug-log');
-            const gameList = document.getElementById('game-list');
-            
-            debugLog.innerText = "Buscando partidas...";
+            debugLog.innerText = "Sincronizando com a API...";
 
             try {
                 const response = await fetch(URL, {
@@ -164,71 +154,48 @@
                 if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
 
                 const data = await response.json();
-                debugLog.innerText = `Sucesso! Jogos encontrados: ${data.resultSet.count}`;
-                
-                // Limpa a tela de "Carregando"
-                gameList.innerHTML = '';
+                debugLog.innerText = "Atualizado com sucesso!";
 
                 if (data.resultSet.count > 0) {
+                    const match = data.matches[0]; // Pega a primeira partida
+
+                    document.getElementById('team-a').innerText = match.homeTeam.tla || "---";
+                    document.getElementById('team-b').innerText = match.awayTeam.tla || "---";
+
+                    const golHome = match.score.fullTime.home;
+                    const golAway = match.score.fullTime.away;
                     
-                    // Cria a listagem varrendo todas as partidas de hoje
-                    data.matches.forEach(match => {
-                        
-                        // Extração de dados com proteção contra nulos
-                        const siglaHome = match.homeTeam.tla || "---";
-                        const siglaAway = match.awayTeam.tla || "---";
-                        const logoHome = match.homeTeam.crest || "";
-                        const logoAway = match.awayTeam.crest || "";
-                        
-                        const golHome = match.score.fullTime.home !== null ? match.score.fullTime.home : "0";
-                        const golAway = match.score.fullTime.away !== null ? match.score.fullTime.away : "0";
+                    document.getElementById('score-a').innerText = golHome !== null ? golHome : "0";
+                    document.getElementById('score-b').innerText = golAway !== null ? golAway : "0";
 
-                        // Tradução de Status
-                        let statusTela = "Aguardando";
-                        if (match.status === "IN_PLAY") statusTela = "Ao Vivo";
-                        else if (match.status === "PAUSED") statusTela = "Intervalo";
-                        else if (match.status === "FINISHED") statusTela = "Encerrado";
-                        else if (match.status === "TIMED") statusTela = "Marcado (Hoje)";
+                    let statusAPI = match.status;
+                    let statusTela = "Aguardando";
+                    
+                    if (statusAPI === "IN_PLAY") statusTela = "Ao Vivo";
+                    else if (statusAPI === "PAUSED") statusTela = "Intervalo";
+                    else if (statusAPI === "FINISHED") statusTela = "Encerrado";
+                    else if (statusAPI === "TIMED") statusTela = "Hoje";
 
-                        // Montando o HTML do Card da Partida
-                        const cardHTML = `
-                            <div class="match-card">
-                                <div class="status">${statusTela}</div>
-                                <div class="scoreboard">
-                                    <div class="team">
-                                        <img src="${logoHome}" class="team-logo" alt="${siglaHome}">
-                                        <div class="team-name">${siglaHome}</div>
-                                    </div>
-                                    <div class="score">${golHome} - ${golAway}</div>
-                                    <div class="team">
-                                        <img src="${logoAway}" class="team-logo" alt="${siglaAway}">
-                                        <div class="team-name">${siglaAway}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        
-                        gameList.innerHTML += cardHTML;
-                    });
+                    document.getElementById('status-text').innerText = statusTela;
 
                 } else {
-                    gameList.innerHTML = '<div style="color: #FFA500; text-align: center; margin-top: 50px; font-size: 16px;">Sem jogos da Copa<br>programados para hoje.</div>';
+                    document.getElementById('status-text').innerText = "Sem jogos hoje";
+                    document.getElementById('team-a').innerText = "---";
+                    document.getElementById('team-b').innerText = "---";
+                    document.getElementById('score-a').innerText = "0";
+                    document.getElementById('score-b').innerText = "0";
                 }
 
             } catch (erro) {
                 console.error("Falha:", erro);
                 debugLog.innerText = `Erro: ${erro.message}`;
                 debugLog.style.color = "#FF0000";
-                gameList.innerHTML = '<div style="color: #FF0000; text-align: center; margin-top: 50px;">ERRO DE REDE<br>Verifique o Proxy/API</div>';
+                document.getElementById('status-text').innerText = "ERRO DE REDE";
             }
         }
 
-        // Chamada inicial
         buscarDadosCopa();
-
-        // Atualiza os dados a cada 60 segundos
-        setInterval(buscarDadosCopa, 60000);
+        setInterval(buscarDadosCopa, 30000); // 30 segundos, igual ao C++
     </script>
-
 </body>
 </html>
