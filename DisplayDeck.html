@@ -161,6 +161,9 @@
         // Sua URL do Worker (Proxy Privado)
         const URL_PROXY = 'https://proud-sky-72e9.samuelrochalemes20042014.workers.dev/v4/matches?competitions=WC';
 
+        let placaresAnteriores = {};
+        const somGol = new Audio('assets/audio.mp3');
+        
         function criarBlocoPartida(match, isLive = false) {
             const siglaA = match.homeTeam.tla || "---";
             const siglaB = match.awayTeam.tla || "---";
@@ -202,7 +205,6 @@
             const mainQueue = document.getElementById('main-queue');
             const historyContent = document.getElementById('history-content');
             
-            // Timestamp para forçar nova requisição e evitar cache do navegador
             const urlFinal = `${URL_PROXY}&nocache=${new Date().getTime()}`;
 
             try {
@@ -214,7 +216,18 @@
 
                 const aoVivo = [], proximos = [], encerrados = [];
                 data.matches.forEach(m => {
-                    if (m.status === "IN_PLAY" || m.status === "PAUSED") aoVivo.push(m);
+                    if (m.status === "IN_PLAY" || m.status === "PAUSED") { aoVivo.push(m);
+                        const golsCasa = m.score.fullTime.home !== null ? m.score.fullTime.home : 0;
+                        const golsFora = m.score.fullTime.away !== null ? m.score.fullTime.away : 0;
+                        const totalGolsAtuais = golsCasa + golsFora;
+
+                        if (placaresAnteriores[m.id] !== undefined && totalGolsAtuais > placaresAnteriores[m.id]) {
+                          somGol.play().catch(e => console.log("Áudio bloqueado pelo navegador", e));
+                        }
+        
+
+                        placaresAnteriores[m.id] = totalGolsAtuais;
+                    }
                     else if (m.status === "FINISHED") encerrados.push(m);
                     else proximos.push(m);
                 });
