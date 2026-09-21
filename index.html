@@ -206,32 +206,72 @@ body, html {
   flex: 1;
   position: relative;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: flex-start;
-  padding: 60px 50px 120px 50px;
-  gap: 60px;
+  padding: 60px 8% 120px 8%;
   background: var(--s1);
   border-left: 1px solid var(--border);
   z-index: 1;
 }
 
-.right-bg-gradient {
+.bg-slider {
+  position: absolute;
+  top: 12%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+  overflow: hidden;
+  z-index: -2;
+}
+
+.right-panel-gradient {
+  position: absolute;
+  top: 12%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-top-left-radius: 40px;
+  border-top-right-radius: 40px;
+  background: linear-gradient(to right, var(--s1) 0%, rgba(32,32,40,0.95) 30%, transparent 80%),
+              linear-gradient(to bottom, var(--s1) 0%, rgba(32,32,40,0.6) 20%, transparent 100%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.slide {
   position: absolute;
   top: 0;
   left: 0;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle at top left, rgba(232,255,71,0.06) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: -1;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+.slide.active {
+  opacity: 1;
+}
+
+.slide-1 {
+  background-image: url('./assets/bg-deck.png');
+}
+
+.slide-2 {
+  background-image: url('./assets/bg-deck-2.png');
+}
+
+.slide-3 {
+  background-image: url('./assets/bg-deck-3.png');
 }
 
 .right-content {
-  display: flex;
-  flex-direction: column;
-  max-width: 420px;
-  margin-top: 20px;
+  position: relative;
   z-index: 2;
+  max-width: 500px;
 }
 
 .description {
@@ -352,49 +392,10 @@ body, html {
   letter-spacing: 2px;
 }
 
-.right-image-wrapper {
-  flex: 1;
-  position: relative;
-  margin-top: 20px;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  border: 1px solid var(--border2);
-  aspect-ratio: 16/10;
-  min-height: 300px;
-  max-width: 800px;
-  background: var(--s2);
-  z-index: 2;
-}
-
-.slide {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  transition: opacity 1.5s ease-in-out;
-}
-
-.slide.active {
-  opacity: 1;
-}
-
-.slide-1 {
-  background-image: url('./assets/bg-deck.png');
-}
-
-.slide-2 {
-  background-image: url('./assets/bg-deck-2.png');
-}
-
 .footer {
   position: absolute;
   bottom: 30px;
-  left: 50px;
+  left: 8%;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -459,24 +460,31 @@ body, html {
   }
 
   .right-panel { 
-    flex-direction: column;
     padding: 50px 30px 140px 30px; 
     border-left: none; 
     border-top: 1px solid var(--border); 
     align-items: center; 
-    gap: 40px;
+  }
+
+  .bg-slider {
+    top: 25%;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+  }
+
+  .right-panel-gradient {
+    top: 25%;
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    background: linear-gradient(to bottom, var(--s1) 0%, rgba(32,32,40,0.85) 50%, transparent 100%);
   }
 
   .right-content {
     max-width: 100%;
     text-align: center;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    margin-top: 0;
-  }
-
-  .right-image-wrapper {
-    width: 100%;
-    margin-top: 0;
   }
 
   .tabs-container {
@@ -527,7 +535,13 @@ body, html {
 
   <div class="right-panel">
     
-    <div class="right-bg-gradient"></div>
+    <div class="bg-slider">
+      <div class="slide slide-1 active"></div>
+      <div class="slide slide-2"></div>
+      <div class="slide slide-3"></div>
+    </div>
+    
+    <div class="right-panel-gradient"></div>
 
     <div class="right-content">
       <p class="description">
@@ -572,11 +586,6 @@ body, html {
       <div id="tab-midi" class="tab-content">
         <div class="soon-badge">Em Breve</div>
       </div>
-    </div>
-
-    <div class="right-image-wrapper">
-      <div class="slide slide-1 active"></div>
-      <div class="slide slide-2"></div>
     </div>
 
     <div class="footer">
