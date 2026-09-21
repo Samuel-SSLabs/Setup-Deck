@@ -42,7 +42,7 @@ body, html {
 }
 
 .left-panel {
-  flex: 1;
+  flex: 0 0 420px;
   position: relative;
   display: flex;
   align-items: center;
@@ -87,9 +87,9 @@ body, html {
   flex-direction: column;
   align-items: center; 
   text-align: center;  
-  max-width: 440px; 
+  max-width: 100%; 
   width: 100%;
-  padding: 0 20px;
+  padding: 0 30px;
 }
 
 .header-wrapper {
@@ -160,7 +160,6 @@ body, html {
   justify-content: center;
   gap: 12px;
   width: 100%;
-  max-width: 380px;
   padding: 18px 40px;
   border-radius: var(--rs);
   border: 1px solid var(--accent);
@@ -207,55 +206,32 @@ body, html {
   flex: 1;
   position: relative;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 8%;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 60px 50px 120px 50px;
+  gap: 60px;
   background: var(--s1);
   border-left: 1px solid var(--border);
   z-index: 1;
 }
 
-.bg-slider {
+.right-bg-gradient {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -2;
-  overflow: hidden;
-}
-
-.slide {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  transition: opacity 1.5s ease-in-out;
-  filter: grayscale(15%);
-}
-
-.slide.active {
-  opacity: 1;
-}
-
-.slide-1 {
-  background-image: url('./assets/bg-deck.png');
-}
-
-.slide-2 {
-  background-image: url('./assets/bg-deck-2.png');
-}
-
-.right-panel::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(to right, var(--s1) 0%, rgba(32,32,40,0.3) 100%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle at top left, rgba(232,255,71,0.06) 0%, transparent 60%);
+  pointer-events: none;
   z-index: -1;
+}
+
+.right-content {
+  display: flex;
+  flex-direction: column;
+  max-width: 420px;
+  margin-top: 20px;
+  z-index: 2;
 }
 
 .description {
@@ -263,7 +239,6 @@ body, html {
   line-height: 1.6;
   color: var(--muted);
   margin-bottom: 30px;
-  max-width: 90%;
 }
 
 .section-label {
@@ -377,14 +352,52 @@ body, html {
   letter-spacing: 2px;
 }
 
-.footer {
+.right-image-wrapper {
+  flex: 1;
+  position: relative;
+  margin-top: 20px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  border: 1px solid var(--border2);
+  aspect-ratio: 16/10;
+  min-height: 300px;
+  max-width: 800px;
+  background: var(--s2);
+  z-index: 2;
+}
+
+.slide {
   position: absolute;
-  bottom: 24px;
+  top: 0;
   left: 0;
   width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+.slide.active {
+  opacity: 1;
+}
+
+.slide-1 {
+  background-image: url('./assets/bg-deck.png');
+}
+
+.slide-2 {
+  background-image: url('./assets/bg-deck-2.png');
+}
+
+.footer {
+  position: absolute;
+  bottom: 30px;
+  left: 50px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   z-index: 10;
 }
@@ -434,50 +447,36 @@ body, html {
   font-size: 14px;
 }
 
-@media (max-width: 900px) {
-  
+@media (max-width: 1100px) {
   .layout { 
     flex-direction: column; 
   }
 
   .left-panel { 
+    flex: none;
+    width: 100%;
     padding: 60px 20px; 
   }
 
-  .logo-box {
-    width: 160px; 
-    height: 160px;
-  }
-
-  .logo-box img {
-    width: 90px; 
-    height: 90px;
-  }
-
-  .title {
-    font-size: 48px; 
-  }
-
-  .download-btn {
-    font-size: 22px;
-    padding: 16px 30px;
-  }
-
   .right-panel { 
-    padding: 50px 24px 120px 24px; 
+    flex-direction: column;
+    padding: 50px 30px 140px 30px; 
     border-left: none; 
     border-top: 1px solid var(--border); 
     align-items: center; 
-    text-align: center;
+    gap: 40px;
   }
 
-  .right-panel::after {
-    background: linear-gradient(to bottom, var(--s1) 0%, rgba(32,32,40,0.4) 100%);
-  }
-
-  .description {
+  .right-content {
     max-width: 100%;
-    font-size: 15px;
+    text-align: center;
+    align-items: center;
+    margin-top: 0;
+  }
+
+  .right-image-wrapper {
+    width: 100%;
+    margin-top: 0;
   }
 
   .tabs-container {
@@ -489,7 +488,9 @@ body, html {
   }
 
   .footer {
-    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    align-items: center;
   }
 }
 </style>
@@ -526,52 +527,56 @@ body, html {
 
   <div class="right-panel">
     
-    <div class="bg-slider">
+    <div class="right-bg-gradient"></div>
+
+    <div class="right-content">
+      <p class="description">
+        O ecossistema definitivo para controle de atalhos e macros do seu setup. 
+        Desenvolvido para oferecer resposta imediata e integração nativa, elevando 
+        sua produtividade e imersão a um novo nível de eficiência.
+      </p>
+
+      <div class="section-label">Dispositivos Compatíveis</div>
+      
+      <div class="tabs-container">
+        <button class="tab-btn active" data-target="tab-deck">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z M7 10h2 M11 10h2 M15 10h2 M9 14h6" /></svg>
+          Deck
+        </button>
+        <button class="tab-btn" data-target="tab-display">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M12 17v4 M8 21h8" /></svg>
+          Display
+        </button>
+        <button class="tab-btn" data-target="tab-midi">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z M6 11v7 M10 11v7 M14 18V6 M18 11v7 M5.5 6v5h1V6 M9.5 6v5h1V6 M17.5 6v5h1V6" /></svg>
+          MIDI
+        </button>
+      </div>
+
+      <div id="tab-deck" class="tab-content active">
+        <ul class="devices-list">
+          <li>Core Deck</li>
+          <li>Pulse Deck</li>
+          <li>Wave Deck</li>
+        </ul>
+      </div>
+
+      <div id="tab-display" class="tab-content">
+        <ul class="devices-list">
+          <li>Display Lite</li>
+          <li>Display Core</li>
+          <li>Display Pro</li>
+        </ul>
+      </div>
+
+      <div id="tab-midi" class="tab-content">
+        <div class="soon-badge">Em Breve</div>
+      </div>
+    </div>
+
+    <div class="right-image-wrapper">
       <div class="slide slide-1 active"></div>
       <div class="slide slide-2"></div>
-    </div>
-
-    <p class="description">
-      O ecossistema definitivo para controle de atalhos e macros do seu setup. 
-      Desenvolvido para oferecer resposta imediata e integração nativa, elevando 
-      sua produtividade e imersão a um novo nível de eficiência.
-    </p>
-
-    <div class="section-label">Dispositivos Compatíveis</div>
-    
-    <div class="tabs-container">
-      <button class="tab-btn active" data-target="tab-deck">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z M7 10h2 M11 10h2 M15 10h2 M9 14h6" /></svg>
-        Deck
-      </button>
-      <button class="tab-btn" data-target="tab-display">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M12 17v4 M8 21h8" /></svg>
-        Display
-      </button>
-      <button class="tab-btn" data-target="tab-midi">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z M6 11v7 M10 11v7 M14 18V6 M18 11v7 M5.5 6v5h1V6 M9.5 6v5h1V6 M17.5 6v5h1V6" /></svg>
-        MIDI
-      </button>
-    </div>
-
-    <div id="tab-deck" class="tab-content active">
-      <ul class="devices-list">
-        <li>Core Deck</li>
-        <li>Pulse Deck</li>
-        <li>Wave Deck</li>
-      </ul>
-    </div>
-
-    <div id="tab-display" class="tab-content">
-      <ul class="devices-list">
-        <li>Display Lite</li>
-        <li>Display Core</li>
-        <li>Display Pro</li>
-      </ul>
-    </div>
-
-    <div id="tab-midi" class="tab-content">
-      <div class="soon-badge">Em Breve</div>
     </div>
 
     <div class="footer">
